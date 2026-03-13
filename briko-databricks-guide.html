@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Briko's Big Data Adventure — An Illustrated Guide to Databricks</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #e8f4ff;
+  --grass: #4caf7d;
+  --brick-red: #ff5252;
+  --spark-orange: #ff8c00;
+  --delta-blue: #1565c0;
+  --photon-yellow: #ffd600;
+  --unity-purple: #7c3aed;
+  --flow-teal: #00897b;
+  --ml-pink: #e91e8c;
+  --cloud-white: #ffffff;
+  --ink: #1a1a2e;
+  --panel-bg: #fff9f0;
+  --panel-border: #ffe0b2;
+  --speech-bg: #fff;
+  --chapter-amber: #ff8f00;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--sky);
+  font-family: 'Nunito', sans-serif;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ===== COVER ===== */
+.cover {
+  min-height: 100vh;
+  background: linear-gradient(180deg,
+    #87ceeb 0%, #b8e4ff 40%,
+    #c8f0a0 70%, #4caf7d 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sun */
+.cover::before {
+  content: '';
+  position: absolute;
+  top: 6%; right: 12%;
+  width: 100px; height: 100px;
+  background: radial-gradient(circle, #fff176, #ffd600);
+  border-radius: 50%;
+  box-shadow: 0 0 60px 20px rgba(255,214,0,0.4);
+  animation: sunPulse 3s ease-in-out infinite;
+}
+@keyframes sunPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+
+/* Clouds */
+.cloud {
+  position: absolute;
+  background: white;
+  border-radius: 50px;
+  opacity: 0.9;
+}
+.cloud::before, .cloud::after {
+  content: '';
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+}
+
+.cover-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  color: var(--ink);
+  line-height: 1.1;
+  text-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 2;
+}
+.cover-title span { color: var(--brick-red); }
+
+.cover-subtitle {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: #444;
+  margin: 0.5rem 0 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* BRIKO SVG character */
+.briko-cover {
+  width: 200px;
+  height: 220px;
+  position: relative;
+  z-index: 2;
+  animation: brikoBounce 2s ease-in-out infinite;
+  margin: 1rem 0;
+}
+@keyframes brikoBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+.cover-tagline {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--delta-blue);
+  background: white;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  position: relative; z-index: 2;
+}
+
+/* ===== NAV ===== */
+.toc {
+  background: var(--ink);
+  padding: 3rem 2rem;
+  color: white;
+}
+.toc h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  text-align: center;
+  color: var(--photon-yellow);
+  margin-bottom: 2rem;
+}
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.toc-item {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 2px solid transparent;
+}
+.toc-item:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: var(--photon-yellow);
+  transform: translateX(4px);
+}
+.toc-item .ch-num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: var(--photon-yellow);
+  min-width: 36px;
+}
+.toc-item .ch-title { font-size: 0.85rem; font-weight: 600; }
+
+/* ===== CHAPTER LAYOUT ===== */
+.chapter {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  border-bottom: 4px dashed rgba(0,0,0,0.08);
+}
+
+.chapter-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+.chapter-num-badge {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  background: var(--chapter-amber);
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+}
+.chapter-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  color: var(--ink);
+  line-height: 1.2;
+}
+.chapter-char-name {
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* ===== STORY PANELS ===== */
+.story-panels {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.panel {
+  background: white;
+  border-radius: 20px;
+  border: 3px solid var(--ink);
+  overflow: hidden;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.12);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 220px;
+}
+.panel.full { grid-template-columns: 1fr; }
+.panel.flip { direction: rtl; }
+.panel.flip > * { direction: ltr; }
+
+.panel-art {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 200px;
+}
+.panel-story {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--panel-bg);
+  border-left: 3px solid var(--ink);
+}
+.panel.flip .panel-story { border-left: none; border-right: 3px solid var(--ink); }
+
+.panel-narrative {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+}
+.panel-narrative strong { color: var(--brick-red); }
+
+/* ===== SPEECH BUBBLES ===== */
+.speech {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 18px;
+  padding: 0.8rem 1.1rem;
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  position: relative;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+  max-width: 240px;
+}
+.speech.briko { border-color: var(--brick-red); }
+.speech.char { border-color: var(--delta-blue); }
+.speech::after {
+  content: '';
+  position: absolute;
+  bottom: -14px; left: 20px;
+  width: 0; height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 14px solid var(--ink);
+}
+.speech.right::after { left: auto; right: 20px; }
+.speech.briko::after { border-top-color: var(--brick-red); }
+.speech.char::after { border-top-color: var(--delta-blue); }
+.speech-label {
+  font-family: 'Caveat', cursive;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--brick-red);
+  margin-bottom: 0.3rem;
+}
+.speech-label.char-name { color: var(--delta-blue); }
+
+/* ===== DID YOU KNOW ===== */
+.did-you-know {
+  background: linear-gradient(135deg, #fff9e6, #fff3cd);
+  border: 2.5px solid var(--photon-yellow);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  position: relative;
+  box-shadow: 4px 4px 0 rgba(255,214,0,0.3);
+}
+.did-you-know::before {
+  content: '💡 DID YOU KNOW?';
+  display: block;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.9rem;
+  color: #b8860b;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+.did-you-know p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* ===== ARCHITECTURE DIAGRAMS ===== */
+.arch-diagram {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+}
+.arch-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  text-align: center;
+  color: var(--delta-blue);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px dashed #ddd;
+}
+.arch-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.arch-layer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.arch-box {
+  flex: 1;
+  border: 2.5px solid;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.arch-box .box-icon { font-size: 1.3rem; }
+.arch-box .box-label { font-size: 0.68rem; font-weight: 600; }
+.arch-arrow-row {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #999;
+  padding: 0.1rem 0;
+}
+
+/* ===== MEDALLION DIAGRAM ===== */
+.medallion {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 1.5rem 0;
+}
+.medallion-layer {
+  flex: 1;
+  min-width: 160px;
+  border: 3px solid;
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  position: relative;
+}
+.medallion-layer h4 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.medallion-layer ul {
+  list-style: none;
+  font-size: 0.78rem;
+  line-height: 2;
+}
+.bronze { border-color: #cd7f32; background: #fff8f0; color: #7d4e1a; }
+.silver { border-color: #9e9e9e; background: #f8f8f8; color: #424242; }
+.gold   { border-color: #ffc107; background: #fffde7; color: #7d6608; }
+
+/* ===== CHARACTERS ===== */
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.25rem;
+  margin: 2rem 0;
+}
+.char-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+.char-card:hover { transform: translateY(-4px) rotate(-1deg); }
+.char-card h4 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  margin: 0.5rem 0 0.2rem;
+}
+.char-card .role { font-size: 0.72rem; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.char-card .desc { font-size: 0.78rem; margin-top: 0.5rem; line-height: 1.5; color: #444; }
+
+/* ===== SVG CHARACTERS ===== */
+svg.char-svg { width: 80px; height: 90px; display: block; margin: 0 auto; }
+svg.char-svg-lg { width: 130px; height: 150px; display: block; margin: 0 auto; }
+svg.char-svg-xl { width: 160px; height: 180px; display: block; margin: 0 auto; }
+svg.char-svg-panel { width: 100%; height: 100%; max-width: 180px; }
+
+/* ===== SCENARIO BOX ===== */
+.scenario {
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  border: 2.5px solid var(--grass);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+}
+.scenario h4 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  color: var(--grass);
+  margin-bottom: 0.5rem;
+}
+.scenario p { font-size: 0.88rem; line-height: 1.6; color: #333; }
+
+/* ===== ECOSYSTEM MAP ===== */
+.ecosystem { 
+  background: linear-gradient(135deg, #0d1b2a, #1a3a5c);
+  color: white;
+  padding: 3rem 2rem;
+}
+.ecosystem h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.2rem;
+  text-align: center;
+  color: var(--photon-yellow);
+  margin-bottom: 2.5rem;
+}
+.eco-map {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+.eco-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.eco-node {
+  border: 3px solid;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  text-align: center;
+  min-width: 120px;
+  flex: 1;
+  max-width: 160px;
+}
+.eco-node h4 { font-family: 'Fredoka One', cursive; font-size: 0.95rem; margin: 0.3rem 0 0.2rem; }
+.eco-node p { font-size: 0.68rem; opacity: 0.8; }
+.eco-node .eco-icon { font-size: 1.6rem; }
+.eco-arrow { font-size: 1.5rem; color: rgba(255,255,255,0.4); text-align: center; }
+
+/* Backgrounds per chapter */
+.bg-lake   { background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%); }
+.bg-forest { background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%); }
+.bg-city   { background: linear-gradient(180deg, #f3e5f5 0%, #e1bee7 100%); }
+.bg-desert { background: linear-gradient(180deg, #fff8e1 0%, #ffecb3 100%); }
+.bg-night  { background: linear-gradient(180deg, #1a237e 0%, #283593 100%); color: white; }
+.bg-night .chapter-title, .bg-night .panel-narrative { color: white !important; }
+.bg-teal   { background: linear-gradient(180deg, #e0f2f1 0%, #b2dfdb 100%); }
+.bg-pink   { background: linear-gradient(180deg, #fce4ec 0%, #f8bbd0 100%); }
+
+/* Read more button */
+.read-btn {
+  display: inline-block;
+  background: var(--brick-red);
+  color: white;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  transition: all 0.2s;
+  text-decoration: none;
+  margin-top: 1rem;
+}
+.read-btn:hover { transform: translateY(-2px); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); }
+
+/* Footer */
+.footer {
+  background: var(--ink);
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: var(--photon-yellow);
+}
+
+@media (max-width: 640px) {
+  .panel { grid-template-columns: 1fr; }
+  .panel-story { border-left: none !important; border-right: none !important; border-top: 3px solid var(--ink); }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== COVER ========== -->
+<div class="cover">
+  <!-- Clouds -->
+  <div class="cloud" style="width:120px;height:40px;top:12%;left:8%;opacity:0.95">
+    <div style="position:absolute;width:60px;height:60px;border-radius:50%;background:white;top:-30px;left:15px"></div>
+    <div style="position:absolute;width:40px;height:40px;border-radius:50%;background:white;top:-20px;left:50px"></div>
+  </div>
+  <div class="cloud" style="width:90px;height:30px;top:20%;left:65%;opacity:0.9">
+    <div style="position:absolute;width:45px;height:45px;border-radius:50%;background:white;top:-22px;left:10px"></div>
+  </div>
+
+  <!-- Mountains in background -->
+  <svg style="position:absolute;bottom:0;left:0;width:100%;opacity:0.3" viewBox="0 0 1000 200" preserveAspectRatio="none">
+    <polygon points="0,200 150,60 300,200" fill="#2e7d32"/>
+    <polygon points="200,200 380,40 560,200" fill="#388e3c"/>
+    <polygon points="600,200 750,80 900,200" fill="#2e7d32"/>
+    <polygon points="750,200 900,50 1000,200" fill="#1b5e20"/>
+  </svg>
+
+  <div class="cover-title">
+    Briko's Big<br><span>Data Adventure</span>
+  </div>
+  <div class="cover-subtitle">An Illustrated Guide to the Databricks Lakehouse 🏠</div>
+
+  <!-- BRIKO character SVG -->
+  <svg class="briko-cover" viewBox="0 0 200 220" style="width:200px;height:220px;position:relative;z-index:2">
+    <!-- Body -->
+    <ellipse cx="100" cy="140" rx="55" ry="60" fill="#ff5252"/>
+    <!-- Shirt stripes -->
+    <rect x="60" y="120" width="80" height="8" rx="4" fill="#ff8a80" opacity="0.5"/>
+    <rect x="60" y="138" width="80" height="8" rx="4" fill="#ff8a80" opacity="0.5"/>
+    <!-- Head -->
+    <circle cx="100" cy="75" r="50" fill="#ffc67a"/>
+    <!-- Hair -->
+    <ellipse cx="100" cy="30" rx="45" ry="18" fill="#5d4037"/>
+    <rect x="55" y="30" width="90" height="15" rx="8" fill="#5d4037"/>
+    <!-- Eyes -->
+    <circle cx="82" cy="72" r="9" fill="white"/>
+    <circle cx="118" cy="72" r="9" fill="white"/>
+    <circle cx="85" cy="74" r="5" fill="#333"/>
+    <circle cx="121" cy="74" r="5" fill="#333"/>
+    <circle cx="87" cy="72" r="2" fill="white"/>
+    <circle cx="123" cy="72" r="2" fill="white"/>
+    <!-- Smile -->
+    <path d="M82,92 Q100,108 118,92" stroke="#a0522d" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- Cheeks -->
+    <circle cx="70" cy="86" r="8" fill="#ff8a65" opacity="0.5"/>
+    <circle cx="130" cy="86" r="8" fill="#ff8a65" opacity="0.5"/>
+    <!-- Arms -->
+    <ellipse cx="44" cy="140" rx="16" ry="28" fill="#ff5252" transform="rotate(-15,44,140)"/>
+    <ellipse cx="156" cy="140" rx="16" ry="28" fill="#ff5252" transform="rotate(15,156,140)"/>
+    <!-- Hands -->
+    <circle cx="34" cy="162" r="12" fill="#ffc67a"/>
+    <circle cx="168" cy="160" r="12" fill="#ffc67a"/>
+    <!-- Holding a tiny lakehouse -->
+    <rect x="150" y="145" width="28" height="22" rx="3" fill="#1565c0"/>
+    <polygon points="150,145 164,132 178,145" fill="#ff8c00"/>
+    <!-- Legs -->
+    <rect x="78" y="190" width="22" height="26" rx="8" fill="#5d4037"/>
+    <rect x="100" y="190" width="22" height="26" rx="8" fill="#5d4037"/>
+    <!-- Shoes -->
+    <ellipse cx="89" cy="217" rx="14" ry="7" fill="#333"/>
+    <ellipse cx="111" cy="217" rx="14" ry="7" fill="#333"/>
+    <!-- Backpack -->
+    <rect x="140" y="115" width="28" height="36" rx="8" fill="#ff8c00"/>
+    <rect x="145" y="125" width="18" height="12" rx="4" fill="#ffa726"/>
+    <!-- DB logo on backpack -->
+    <text x="146" y="138" font-family="Arial" font-size="9" font-weight="bold" fill="white">DB</text>
+  </svg>
+
+  <div class="cover-tagline">🦋 For developers, data engineers &amp; architects who want to truly get it</div>
+</div>
+
+<!-- ========== TABLE OF CONTENTS ========== -->
+<div class="toc">
+  <h2>📖 Adventures Inside</h2>
+  <div class="toc-grid">
+    <div class="toc-item" onclick="scrollToChapter('ch1')"><span class="ch-num">1</span><span class="ch-title">The Lakehouse — Where Data Lives</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch2')"><span class="ch-num">2</span><span class="ch-title">Meet the Characters of Lakehouse World</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch3')"><span class="ch-num">3</span><span class="ch-title">The Platform Map — Control &amp; Data Planes</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch4')"><span class="ch-num">4</span><span class="ch-title">Delta the Historian — Delta Lake</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch5')"><span class="ch-num">5</span><span class="ch-title">Tables Galore — Managed, External &amp; Temp</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch6')"><span class="ch-num">6</span><span class="ch-title">Time Travel — Delta's Magic Diary</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch7')"><span class="ch-num">7</span><span class="ch-title">Spark the Engine Master — Core Concepts</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch8')"><span class="ch-num">8</span><span class="ch-title">The DAG Factory — How Spark Plans Work</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch9')"><span class="ch-num">9</span><span class="ch-title">Photon the Speed Wizard — Acceleration</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch10')"><span class="ch-num">10</span><span class="ch-title">Clusters — The Compute Villages</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch11')"><span class="ch-num">11</span><span class="ch-title">The Medallion Kingdom — Bronze, Silver, Gold</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch12')"><span class="ch-num">12</span><span class="ch-title">Flow the Pipeline Engineer — Data Engineering</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch13')"><span class="ch-num">13</span><span class="ch-title">Auto Loader &amp; the River of Data</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch14')"><span class="ch-num">14</span><span class="ch-title">Stream the River Rider — Real-Time Data</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch15')"><span class="ch-num">15</span><span class="ch-title">Databricks SQL — The Crystal Ball Room</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch16')"><span class="ch-num">16</span><span class="ch-title">Unity the Guardian — Governance &amp; Security</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch17')"><span class="ch-num">17</span><span class="ch-title">Milo the Scientist — Machine Learning</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch18')"><span class="ch-num">18</span><span class="ch-title">MLflow — The Experiment Notebook</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch19')"><span class="ch-num">19</span><span class="ch-title">Shard the Sharer — Delta Sharing</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch20')"><span class="ch-num">20</span><span class="ch-title">Notebooks &amp; the Developer Cave</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch21')"><span class="ch-num">21</span><span class="ch-title">Jobs &amp; Workflows — The Scheduler's Tower</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch22')"><span class="ch-num">22</span><span class="ch-title">DevOps — Terraforming the Lakehouse</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch23')"><span class="ch-num">23</span><span class="ch-title">The Cloud Trio — AWS, Azure &amp; GCP</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch24')"><span class="ch-num">24</span><span class="ch-title">Observability — Watching the Watchers</span></div>
+    <div class="toc-item" onclick="scrollToChapter('ch25')"><span class="ch-num">25</span><span class="ch-title">The Grand Lakehouse Map — Everything Connected</span></div>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 1 ========== -->
+<div class="chapter bg-lake" id="ch1">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 1</span>
+    <div>
+      <div class="chapter-title">🏠 The Lakehouse — Where Data Lives</div>
+      <div class="chapter-char-name">Briko arrives at Lakehouse World for the first time</div>
+    </div>
+  </div>
+
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background: linear-gradient(135deg,#e3f2fd,#90caf9)">
+        <!-- Briko small -->
+        <svg viewBox="0 0 160 180" width="120" height="135">
+          <ellipse cx="80" cy="120" rx="45" ry="50" fill="#ff5252"/>
+          <circle cx="80" cy="65" r="40" fill="#ffc67a"/>
+          <ellipse cx="80" cy="28" rx="36" ry="14" fill="#5d4037"/>
+          <circle cx="66" cy="62" r="7" fill="white"/>
+          <circle cx="94" cy="62" r="7" fill="white"/>
+          <circle cx="68" cy="64" r="4" fill="#333"/>
+          <circle cx="96" cy="64" r="4" fill="#333"/>
+          <path d="M65,78 Q80,90 95,78" stroke="#a0522d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- Wide eyes of wonder -->
+          <circle cx="56" cy="52" r="5" fill="#ff8a65" opacity="0.5"/>
+          <circle cx="104" cy="52" r="5" fill="#ff8a65" opacity="0.5"/>
+          <ellipse cx="32" cy="118" rx="13" ry="22" fill="#ff5252" transform="rotate(-15,32,118)"/>
+          <ellipse cx="128" cy="118" rx="13" ry="22" fill="#ff5252" transform="rotate(15,128,118)"/>
+          <circle cx="24" cy="136" r="10" fill="#ffc67a"/>
+          <circle cx="138" cy="134" r="10" fill="#ffc67a"/>
+          <rect x="62" y="162" width="18" height="18" rx="6" fill="#5d4037"/>
+          <rect x="82" y="162" width="18" height="18" rx="6" fill="#5d4037"/>
+          <!-- ? above head -->
+          <text x="110" y="20" font-family="Fredoka One" font-size="28" fill="#ff5252">?</text>
+        </svg>
+        <!-- Lakehouse building -->
+        <svg viewBox="0 0 100 110" width="90" height="99" style="margin-left:-10px">
+          <rect x="10" y="55" width="80" height="50" rx="5" fill="#1565c0"/>
+          <polygon points="10,55 50,15 90,55" fill="#ff8c00"/>
+          <!-- Windows -->
+          <rect x="20" y="65" width="20" height="18" rx="3" fill="#90caf9"/>
+          <rect x="60" y="65" width="20" height="18" rx="3" fill="#90caf9"/>
+          <rect x="38" y="73" width="24" height="32" rx="3" fill="#5d4037"/>
+          <!-- Lake reflection -->
+          <ellipse cx="50" cy="108" rx="40" ry="6" fill="#90caf9" opacity="0.5"/>
+          <!-- DB on door -->
+          <text x="43" y="93" font-family="Arial" font-size="9" font-weight="bold" fill="white">DB</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech briko">
+          <div class="speech-label">Briko says:</div>
+          Whoooa… what IS this place? It looks like a lake AND a warehouse had a baby! 🤩
+        </div>
+        <p class="panel-narrative">
+          Briko arrives at the entrance of <strong>Lakehouse World</strong> — a magical land where data is stored, transformed, and understood. A sign reads: <em>"Welcome to Databricks — where lakes and warehouses finally got along."</em>
+        </p>
+      </div>
+    </div>
+
+    <div class="panel flip">
+      <div class="panel-art" style="background:linear-gradient(135deg,#fff8e1,#ffecb3)">
+        <!-- Two houses: lake vs warehouse -->
+        <svg viewBox="0 0 200 140" width="100%" height="140" style="max-width:240px">
+          <!-- Data Lake house (messy) -->
+          <rect x="5" y="70" width="70" height="60" rx="4" fill="#4db6ac"/>
+          <polygon points="5,70 40,40 75,70" fill="#26a69a"/>
+          <text x="15" y="95" font-family="Nunito" font-size="7" fill="white" font-weight="bold">Data Lake</text>
+          <text x="12" y="107" font-family="Nunito" font-size="6" fill="#b2dfdb">Cheap storage</text>
+          <text x="12" y="118" font-family="Nunito" font-size="6" fill="#b2dfdb">No structure</text>
+          <text x="12" y="128" font-family="Nunito" font-size="6" fill="#ffcdd2">😕 Hard to query</text>
+          <!-- Warehouse (expensive) -->
+          <rect x="90" y="60" width="70" height="72" rx="4" fill="#5c6bc0"/>
+          <polygon points="90,60 125,30 160,60" fill="#3f51b5"/>
+          <text x="97" y="85" font-family="Nunito" font-size="7" fill="white" font-weight="bold">Data Warehouse</text>
+          <text x="97" y="97" font-family="Nunito" font-size="6" fill="#c5cae9">Fast SQL</text>
+          <text x="97" y="108" font-family="Nunito" font-size="6" fill="#c5cae9">Structured</text>
+          <text x="97" y="119" font-family="Nunito" font-size="6" fill="#ffcdd2">😕 Expensive &amp; rigid</text>
+          <!-- Plus sign -->
+          <text x="176" y="100" font-family="Fredoka One" font-size="30" fill="#ff5252">+</text>
+          <!-- Lakehouse below -->
+          <rect x="60" y="128" width="80" height="12" rx="4" fill="#ff5252"/>
+          <text x="72" y="138" font-family="Nunito" font-size="7" fill="white" font-weight="bold">= LAKEHOUSE ❤️</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <p class="panel-narrative">
+          For years, companies had to choose: use a <strong>data lake</strong> (cheap but messy) or a <strong>data warehouse</strong> (fast but expensive and rigid). Neither was perfect. Then someone had a brilliant idea…
+        </p>
+        <div class="speech char" style="border-color:var(--delta-blue)">
+          <div class="speech-label char-name">A wise voice says:</div>
+          What if we combined the best of both? Open storage like a lake, but with warehouse reliability. That's the Lakehouse!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="did-you-know">
+    <p>The term <strong>Lakehouse</strong> was coined by Databricks researchers in 2020. The key insight: use open file formats (like Parquet) directly on cloud storage, then add a metadata + transactional layer (Delta Lake) on top to make it behave like a warehouse — without the warehouse price tag!</p>
+  </div>
+
+  <div class="arch-diagram">
+    <div class="arch-title">🏗️ The Lakehouse Architecture Stack</div>
+    <div class="arch-layers">
+      <div class="arch-layer">
+        <div class="arch-box" style="border-color:#e91e8c;background:#fce4ec;color:#880e4f"><div class="box-icon">📊</div><div>BI & Analytics</div><div class="box-label">SQL · Dashboards · Reports</div></div>
+        <div class="arch-box" style="border-color:#e91e8c;background:#fce4ec;color:#880e4f"><div class="box-icon">🤖</div><div>AI & ML</div><div class="box-label">Models · Experiments</div></div>
+        <div class="arch-box" style="border-color:#e91e8c;background:#fce4ec;color:#880e4f"><div class="box-icon">🔧</div><div>Data Engineering</div><div class="box-label">ETL · Pipelines</div></div>
+      </div>
+      <div class="arch-arrow-row">⬇️ built on top of ⬇️</div>
+      <div class="arch-layer">
+        <div class="arch-box" style="border-color:#1565c0;background:#e3f2fd;color:#0d47a1;flex:2"><div class="box-icon">🔷</div><div>Delta Lake</div><div class="box-label">ACID · Time Travel · Schema</div></div>
+        <div class="arch-box" style="border-color:#00897b;background:#e0f2f1;color:#004d40"><div class="box-icon">🔐</div><div>Unity Catalog</div><div class="box-label">Governance</div></div>
+      </div>
+      <div class="arch-arrow-row">⬇️ stored in ⬇️</div>
+      <div class="arch-layer">
+        <div class="arch-box" style="border-color:#ff8c00;background:#fff8e1;color:#e65100;flex:3"><div class="box-icon">☁️</div><div>Open Cloud Storage</div><div class="box-label">S3 · ADLS · GCS — Parquet / Avro files</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h4>🛍️ Real World: Retail Analytics</h4>
+    <p>A global retailer has 500TB of sales data in AWS S3 — raw CSV files from 2,000 stores. With a pure data lake approach, querying last quarter's revenue takes hours and crashes. With Databricks Lakehouse, the same query runs in 8 seconds using Delta Lake + Photon, with full ACID compliance and no data duplication.</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 2 ========== -->
+<div class="chapter bg-forest" id="ch2">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 2</span>
+    <div>
+      <div class="chapter-title">🎭 Meet the Characters of Lakehouse World</div>
+      <div class="chapter-char-name">Briko discovers who lives here</div>
+    </div>
+  </div>
+
+  <div style="background:white;border:3px solid var(--ink);border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 rgba(0,0,0,0.1);margin-bottom:2rem">
+    <p style="font-family:'Caveat',cursive;font-size:1.2rem;text-align:center;color:#666;margin-bottom:1.5rem">"Every concept in Databricks is a friend waiting to be met," said the welcome sign.</p>
+    <div class="char-grid">
+      <!-- Briko -->
+      <div class="char-card" style="border-color:var(--brick-red)">
+        <svg viewBox="0 0 80 90" class="char-svg">
+          <ellipse cx="40" cy="60" rx="28" ry="30" fill="#ff5252"/>
+          <circle cx="40" cy="32" r="28" fill="#ffc67a"/>
+          <ellipse cx="40" cy="8" rx="24" ry="10" fill="#5d4037"/>
+          <circle cx="30" cy="30" r="5" fill="white"/><circle cx="50" cy="30" r="5" fill="white"/>
+          <circle cx="32" cy="32" r="3" fill="#333"/><circle cx="52" cy="32" r="3" fill="#333"/>
+          <path d="M28,42 Q40,50 52,42" stroke="#a0522d" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <h4 style="color:var(--brick-red)">Briko</h4>
+        <div class="role">Our Hero</div>
+        <div class="desc">Curious explorer learning the lakehouse. Asks all the questions YOU want to ask.</div>
+      </div>
+      <!-- Spark -->
+      <div class="char-card" style="border-color:var(--spark-orange)">
+        <svg viewBox="0 0 80 90" class="char-svg">
+          <ellipse cx="40" cy="62" rx="26" ry="28" fill="#ff8c00"/>
+          <circle cx="40" cy="30" r="27" fill="#ffe0b2"/>
+          <!-- Engine gear head -->
+          <circle cx="40" cy="30" r="20" fill="#ffcc80" stroke="#ff8c00" stroke-width="3"/>
+          <!-- Gear teeth -->
+          <rect x="36" y="5" width="8" height="8" rx="2" fill="#ff8c00"/>
+          <rect x="36" y="47" width="8" height="8" rx="2" fill="#ff8c00"/>
+          <rect x="18" y="26" width="8" height="8" rx="2" fill="#ff8c00"/>
+          <rect x="54" y="26" width="8" height="8" rx="2" fill="#ff8c00"/>
+          <circle cx="40" cy="30" r="10" fill="#ff8c00"/>
+          <circle cx="40" cy="30" r="6" fill="#fff3e0"/>
+          <!-- eyes -->
+          <circle cx="33" cy="28" r="4" fill="white"/><circle cx="47" cy="28" r="4" fill="white"/>
+          <circle cx="34" cy="29" r="2.5" fill="#333"/><circle cx="48" cy="29" r="2.5" fill="#333"/>
+          <!-- Flame -->
+          <path d="M30,62 Q20,50 25,38 Q28,50 32,48 Q28,42 38,32 Q36,44 42,42 Q38,50 50,38 Q48,52 55,62Z" fill="#ff6d00" opacity="0.7"/>
+        </svg>
+        <h4 style="color:var(--spark-orange)">Spark</h4>
+        <div class="role">The Engine Master</div>
+        <div class="desc">Massively parallel, always speeding. Processes billions of rows without breaking a sweat.</div>
+      </div>
+      <!-- Delta -->
+      <div class="char-card" style="border-color:var(--delta-blue)">
+        <svg viewBox="0 0 80 90" class="char-svg">
+          <ellipse cx="40" cy="62" rx="26" ry="28" fill="#1565c0"/>
+          <circle cx="40" cy="30" r="27" fill="#bbdefb"/>
+          <!-- Historian hat -->
+          <rect x="18" y="15" width="44" height="8" rx="4" fill="#0d47a1"/>
+          <rect x="24" y="5" width="32" height="14" rx="6" fill="#1565c0"/>
+          <!-- Scroll/book -->
+          <rect x="26" y="22" width="28" height="20" rx="3" fill="white" stroke="#1565c0" stroke-width="2"/>
+          <line x1="30" y1="27" x2="50" y2="27" stroke="#90caf9" stroke-width="1.5"/>
+          <line x1="30" y1="31" x2="50" y2="31" stroke="#90caf9" stroke-width="1.5"/>
+          <line x1="30" y1="35" x2="45" y2="35" stroke="#90caf9" stroke-width="1.5"/>
+          <!-- eyes below hat -->
+          <circle cx="32" cy="46" r="4" fill="white"/><circle cx="48" cy="46" r="4" fill="white"/>
+          <circle cx="33" cy="47" r="2.5" fill="#1565c0"/><circle cx="49" cy="47" r="2.5" fill="#1565c0"/>
+          <path d="M30,56 Q40,62 50,56" stroke="#0d47a1" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <h4 style="color:var(--delta-blue)">Delta</h4>
+        <div class="role">The Historian</div>
+        <div class="desc">Keeps perfect records of every change. Never forgets anything. Master of ACID transactions.</div>
+      </div>
+      <!-- Photon -->
+      <div class="char-card" style="border-color:var(--photon-yellow)">
+        <svg viewBox="0 0 80 90" class="char-svg">
+          <ellipse cx="40" cy="62" rx="26" ry="28" fill="#ffd600"/>
+          <circle cx="40" cy="30" r="27" fill="#fff9c4"/>
+          <!-- Lightning body -->
+          <path d="M44,5 L30,32 L40,32 L26,58 L50,28 L38,28Z" fill="#ff8f00" opacity="0.8"/>
+          <circle cx="30" cy="25" r="4" fill="white"/><circle cx="54" cy="25" r="4" fill="white"/>
+          <circle cx="31" cy="26" r="2.5" fill="#333"/><circle cx="55" cy="26" r="2.5" fill="#333"/>
+          <path d="M28,40 Q40,48 52,40" stroke="#e65100" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Speed lines -->
+          <line x1="56" y1="60" x2="68" y2="55" stroke="#ff8f00" stroke-width="2" opacity="0.7"/>
+          <line x1="58" y1="65" x2="72" y2="64" stroke="#ff8f00" stroke-width="2" opacity="0.5"/>
+        </svg>
+        <h4 style="color:#e65100)">Photon</h4>
+        <div class="role">Speed Wizard</div>
+        <div class="desc">Rewrites query execution in C++. Makes SQL go zoom. Doesn't like slow queries. At all.</div>
+      </div>
+      <!-- Unity -->
+      <div class="char-card" style="border-color:var(--unity-purple)">
+        <svg viewBox="0 0 80 90" class="char-svg">
+          <ellipse cx="40" cy="62" rx="26" ry="28" fill="#7c3aed"/>
+          <circle cx="40" cy="30" r="27" fill="#e9d5ff"/>
+          <!-- Shield -->
+          <path d="M40,8 L58,16 L58,34 Q58,50 40,58 Q22,50 22,34 L22,16Z" fill="#7c3aed" stroke="#4c1d95" stroke-width="2"/>
+          <path d="M40,14 L53,20 L53,34 Q53,46 40,52 Q27,46 27,34 L27,20Z" fill="#a855f7"/>
+          <!-- checkmark -->
+          <path d="M32,33 L38,39 L50,26" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- eyes below -->
+          <circle cx="32" cy="47" r="3" fill="white"/><circle cx="48" cy="47" r="3" fill="white"/>
+          <circle cx="33" cy="48" r="2" fill="#4c1d95"/><circle cx="49" cy="48" r="2" fill="#4c1d95"/>
+        </svg>
+        <h4 style="color:var(--unity-purple)">Unity</h4>
+        <div class="role">Security Guardian</div>
+        <div class="desc">Governs who sees what. One catalog to rule them all. Takes data security very personally.</div>
+      </div>
+      <!-- Flow -->
+      <div class="char-card" style="border-color:var(--flow-teal)">
+        <svg viewBox="0 0 80 90" class="char-svg">
+          <ellipse cx="40" cy="62" rx="26" ry="28" fill="#00897b"/>
+          <circle cx="40" cy="30" r="27" fill="#b2dfdb"/>
+          <!-- Pipeline tubes -->
+          <rect x="15" y="22" width="50" height="7" rx="3.5" fill="#00897b"/>
+          <rect x="15" y="32" width="50" height="7" rx="3.5" fill="#00695c"/>
+          <circle cx="62" cy="25" r="4" fill="#ffd600"/>
+          <circle cx="62" cy="35" r="4" fill="#ff8c00"/>
+          <circle cx="32" cy="45" r="4" fill="white"/><circle cx="48" cy="45" r="4" fill="white"/>
+          <circle cx="33" cy="46" r="2.5" fill="#004d40"/><circle cx="49" cy="46" r="2.5" fill="#004d40"/>
+          <path d="M30,56 Q40,62 50,56" stroke="#004d40" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- hard hat -->
+          <ellipse cx="40" cy="10" rx="22" ry="9" fill="#ff8c00"/>
+          <rect x="18" y="10" width="44" height="5" rx="2" fill="#e65100"/>
+        </svg>
+        <h4 style="color:var(--flow-teal)">Flow</h4>
+        <div class="role">Pipeline Engineer</div>
+        <div class="desc">Builds data pipelines all day, every day. Obsessed with Delta Live Tables. Has a hard hat collection.</div>
+      </div>
+      <!-- Milo -->
+      <div class="char-card" style="border-color:var(--ml-pink)">
+        <svg viewBox="0 0 80 90" class="char-svg">
+          <ellipse cx="40" cy="62" rx="26" ry="28" fill="#e91e8c"/>
+          <circle cx="40" cy="30" r="27" fill="#fce4ec"/>
+          <!-- Lab coat -->
+          <rect x="26" y="50" width="28" height="20" rx="4" fill="white"/>
+          <!-- Brain -->
+          <ellipse cx="40" cy="22" rx="18" ry="16" fill="#f48fb1"/>
+          <path d="M28,18 Q30,12 36,14 Q38,8 44,10 Q50,8 52,14 Q58,14 56,20 Q58,26 52,28 Q50,34 44,32 Q38,36 34,30 Q28,30 26,24 Q22,18 28,18Z" fill="#f06292" opacity="0.6"/>
+          <!-- eyes -->
+          <circle cx="33" cy="36" r="4" fill="white"/><circle cx="47" cy="36" r="4" fill="white"/>
+          <circle cx="34" cy="37" r="2.5" fill="#880e4f"/><circle cx="48" cy="37" r="2.5" fill="#880e4f"/>
+          <!-- glasses -->
+          <rect x="27" y="33" width="12" height="8" rx="4" fill="none" stroke="#880e4f" stroke-width="1.5"/>
+          <rect x="41" y="33" width="12" height="8" rx="4" fill="none" stroke="#880e4f" stroke-width="1.5"/>
+          <line x1="39" y1="37" x2="41" y2="37" stroke="#880e4f" stroke-width="1.5"/>
+          <path d="M30,48 Q40,54 50,48" stroke="#880e4f" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <h4 style="color:var(--ml-pink)">Milo</h4>
+        <div class="role">ML Scientist</div>
+        <div class="desc">Runs experiments all day. Tracks everything in MLflow. Slightly obsessed with model accuracy.</div>
+      </div>
+      <!-- Shard -->
+      <div class="char-card" style="border-color:#009688">
+        <svg viewBox="0 0 80 90" class="char-svg">
+          <ellipse cx="40" cy="62" rx="26" ry="28" fill="#009688"/>
+          <circle cx="40" cy="30" r="27" fill="#b2dfdb"/>
+          <!-- Sharing arrows -->
+          <path d="M20,30 L40,20 L60,30 L50,30 L50,42 L30,42 L30,30Z" fill="#00695c"/>
+          <path d="M20,30 L20,42 L30,42" stroke="#ffd600" stroke-width="2" fill="none"/>
+          <path d="M50,42 L60,42 L60,30" stroke="#ffd600" stroke-width="2" fill="none"/>
+          <circle cx="20" cy="48" r="4" fill="white"/><circle cx="60" cy="48" r="4" fill="white"/>
+          <circle cx="30" cy="46" r="3" fill="white"/><circle cx="50" cy="46" r="3" fill="white"/>
+          <circle cx="33" cy="48" r="2" fill="#004d40"/><circle cx="47" cy="48" r="2" fill="#004d40"/>
+          <path d="M30,56 Q40,62 50,56" stroke="#004d40" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <h4 style="color:#009688">Shard</h4>
+        <div class="role">The Sharer</div>
+        <div class="desc">Expert in Delta Sharing. Loves sending data to partners. Is extremely trustworthy with secrets.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="did-you-know">
+    <p>Databricks was founded in 2013 by the creators of Apache Spark at UC Berkeley. The company's mascot in real life is a friendly tiger named "Brickster" — but in our story, <strong>Briko the Builder</strong> is our guide through the Lakehouse World!</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 3 ========== -->
+<div class="chapter bg-city" id="ch3">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 3</span>
+    <div>
+      <div class="chapter-title">🗺️ The Platform Map — Control &amp; Data Planes</div>
+      <div class="chapter-char-name">Briko learns how Lakehouse World is organized</div>
+    </div>
+  </div>
+
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#f3e5f5,#ce93d8)">
+        <!-- Control vs Data plane diagram as art -->
+        <svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:260px">
+          <!-- Databricks Cloud (Control Plane) -->
+          <rect x="10" y="10" width="85" height="65" rx="8" fill="#7c3aed" stroke="#4c1d95" stroke-width="2"/>
+          <text x="52" y="26" font-family="Nunito" font-size="7" fill="white" font-weight="bold" text-anchor="middle">DATABRICKS</text>
+          <text x="52" y="35" font-family="Nunito" font-size="6" fill="#e9d5ff" text-anchor="middle">Control Plane</text>
+          <!-- Services -->
+          <rect x="16" y="40" width="22" height="12" rx="3" fill="#a855f7"/>
+          <text x="27" y="49" font-family="Nunito" font-size="5" fill="white" text-anchor="middle">Notebooks</text>
+          <rect x="41" y="40" width="22" height="12" rx="3" fill="#a855f7"/>
+          <text x="52" y="49" font-family="Nunito" font-size="5" fill="white" text-anchor="middle">Job Sched</text>
+          <rect x="66" y="40" width="22" height="12" rx="3" fill="#a855f7"/>
+          <text x="77" y="49" font-family="Nunito" font-size="5" fill="white" text-anchor="middle">REST APIs</text>
+          <rect x="16" y="56" width="73" height="12" rx="3" fill="#6d28d9"/>
+          <text x="52" y="65" font-family="Nunito" font-size="5" fill="white" text-anchor="middle">Cluster Manager · Metadata Services</text>
+
+          <!-- Your Cloud (Data Plane) -->
+          <rect x="105" y="10" width="88" height="65" rx="8" fill="#1565c0" stroke="#0d47a1" stroke-width="2"/>
+          <text x="149" y="26" font-family="Nunito" font-size="7" fill="white" font-weight="bold" text-anchor="middle">YOUR CLOUD</text>
+          <text x="149" y="35" font-family="Nunito" font-size="6" fill="#90caf9" text-anchor="middle">Data Plane</text>
+          <rect x="111" y="40" width="25" height="12" rx="3" fill="#1976d2"/>
+          <text x="123" y="49" font-family="Nunito" font-size="5" fill="white" text-anchor="middle">Compute</text>
+          <rect x="140" y="40" width="25" height="12" rx="3" fill="#1976d2"/>
+          <text x="152" y="49" font-family="Nunito" font-size="5" fill="white" text-anchor="middle">Storage</text>
+          <rect x="169" y="40" width="19" height="12" rx="3" fill="#1976d2"/>
+          <text x="178" y="49" font-family="Nunito" font-size="5" fill="white" text-anchor="middle">VPC/Net</text>
+          <rect x="111" y="56" width="77" height="12" rx="3" fill="#0d47a1"/>
+          <text x="149" y="65" font-family="Nunito" font-size="5" fill="white" text-anchor="middle">Clusters · S3/ADLS/GCS · Spark</text>
+
+          <!-- Bidirectional arrow -->
+          <path d="M95,42 L105,42" stroke="#ff8c00" stroke-width="2" marker-end="url(#arrowR)" marker-start="url(#arrowL)"/>
+          <defs>
+            <marker id="arrowR" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5Z" fill="#ff8c00"/></marker>
+            <marker id="arrowL" markerWidth="5" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse"><path d="M0,0 L5,2.5 L0,5Z" fill="#ff8c00"/></marker>
+          </defs>
+          <text x="100" y="38" font-family="Nunito" font-size="5" fill="#ff8c00" text-anchor="middle">API</text>
+
+          <!-- User -->
+          <circle cx="52" cy="110" r="12" fill="#ffc67a"/>
+          <ellipse cx="52" cy="128" rx="14" ry="10" fill="#ff5252"/>
+          <text x="52" y="145" font-family="Nunito" font-size="7" fill="#333" text-anchor="middle">You (User)</text>
+          <line x1="52" y1="96" x2="52" y2="75" stroke="#555" stroke-width="1.5" stroke-dasharray="4,2"/>
+
+          <!-- Your data stays -->
+          <text x="149" y="105" font-family="Nunito" font-size="7" fill="#1565c0" font-weight="bold" text-anchor="middle">🔒 Your data</text>
+          <text x="149" y="115" font-family="Nunito" font-size="6" fill="#555" text-anchor="middle">never leaves</text>
+          <text x="149" y="124" font-family="Nunito" font-size="6" fill="#555" text-anchor="middle">your account</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech briko">
+          <div class="speech-label">Briko asks:</div>
+          Wait — so Databricks runs THEIR software… but MY data stays in MY cloud account? How does that work?
+        </div>
+        <div class="speech char" style="margin-top:0.75rem;border-color:var(--unity-purple)">
+          <div class="speech-label char-name">Unity explains:</div>
+          Exactly right! The <strong>Control Plane</strong> is Databricks-managed — it runs the UI, API, job scheduler. The <strong>Data Plane</strong> is YOUR cloud — your compute, your storage. Your data never leaves home! 🏠
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arch-diagram">
+    <div class="arch-title">🏢 Account → Workspace → Objects Hierarchy</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem">
+      <div style="background:#7c3aed;color:white;border-radius:12px;padding:0.75rem 2rem;font-weight:700;font-size:0.9rem">🏦 Databricks Account (one per company)</div>
+      <div style="color:#999;font-size:1.2rem">⬇️</div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center">
+        <div style="background:#1565c0;color:white;border-radius:12px;padding:0.75rem 1.5rem;font-weight:700;font-size:0.85rem;text-align:center">🖥️ Workspace<br><span style="font-size:0.7rem;opacity:0.8">Dev Environment</span></div>
+        <div style="background:#1565c0;color:white;border-radius:12px;padding:0.75rem 1.5rem;font-weight:700;font-size:0.85rem;text-align:center">🖥️ Workspace<br><span style="font-size:0.7rem;opacity:0.8">Staging</span></div>
+        <div style="background:#1565c0;color:white;border-radius:12px;padding:0.75rem 1.5rem;font-weight:700;font-size:0.85rem;text-align:center">🖥️ Workspace<br><span style="font-size:0.7rem;opacity:0.8">Production</span></div>
+      </div>
+      <div style="color:#999;font-size:1.2rem">⬇️</div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center">
+        <div style="background:#f0f4ff;border:2px solid #1565c0;border-radius:10px;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;text-align:center">📓 Notebooks</div>
+        <div style="background:#f0f4ff;border:2px solid #1565c0;border-radius:10px;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;text-align:center">⚙️ Clusters</div>
+        <div style="background:#f0f4ff;border:2px solid #1565c0;border-radius:10px;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;text-align:center">📊 Dashboards</div>
+        <div style="background:#f0f4ff;border:2px solid #1565c0;border-radius:10px;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;text-align:center">⏰ Jobs</div>
+        <div style="background:#f0f4ff;border:2px solid #1565c0;border-radius:10px;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;text-align:center">📁 Repos</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="did-you-know">
+    <p>Databricks uses a <strong>shared responsibility model</strong>. Databricks manages software updates, security patches, and the control plane. You manage your cloud account, VPC/VNet configuration, storage access, and data classification. This is why Databricks can offer 99.9% SLA without touching your data!</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 4 ========== -->
+<div class="chapter bg-lake" id="ch4">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 4</span>
+    <div>
+      <div class="chapter-title">📚 Delta the Historian — Delta Lake</div>
+      <div class="chapter-char-name">Meeting the keeper of all records</div>
+    </div>
+  </div>
+
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#e3f2fd,#bbdefb)">
+        <svg viewBox="0 0 200 170" width="100%" height="170" style="max-width:250px">
+          <!-- Library background -->
+          <rect x="0" y="0" width="200" height="170" fill="#e3f2fd" rx="8"/>
+          <!-- Shelves -->
+          <rect x="10" y="30" width="180" height="5" rx="2" fill="#8d6e63"/>
+          <rect x="10" y="70" width="180" height="5" rx="2" fill="#8d6e63"/>
+          <rect x="10" y="110" width="180" height="5" rx="2" fill="#8d6e63"/>
+          <!-- Transaction log books -->
+          <rect x="15" y="10" width="16" height="20" rx="2" fill="#1565c0"/><text x="23" y="24" font-size="6" fill="white" text-anchor="middle" font-weight="bold">v0</text>
+          <rect x="35" y="10" width="16" height="20" rx="2" fill="#1976d2"/><text x="43" y="24" font-size="6" fill="white" text-anchor="middle" font-weight="bold">v1</text>
+          <rect x="55" y="10" width="16" height="20" rx="2" fill="#1e88e5"/><text x="63" y="24" font-size="6" fill="white" text-anchor="middle" font-weight="bold">v2</text>
+          <rect x="75" y="8" width="18" height="22" rx="2" fill="#ff8c00" stroke="#e65100" stroke-width="1.5"/><text x="84" y="23" font-size="6" fill="white" text-anchor="middle" font-weight="bold">v3 ✓</text>
+          <!-- Parquet files -->
+          <rect x="15" y="78" width="22" height="28" rx="3" fill="#81c784"/>
+          <rect x="42" y="78" width="22" height="28" rx="3" fill="#81c784"/>
+          <rect x="69" y="78" width="22" height="28" rx="3" fill="#81c784"/>
+          <text x="26" y="96" font-size="5" fill="white" text-anchor="middle">part-001</text>
+          <text x="53" y="96" font-size="5" fill="white" text-anchor="middle">part-002</text>
+          <text x="80" y="96" font-size="5" fill="white" text-anchor="middle">part-003</text>
+          <!-- Delta character -->
+          <circle cx="158" cy="80" r="28" fill="#bbdefb"/>
+          <rect x="136" y="60" width="44" height="8" rx="4" fill="#0d47a1"/>
+          <rect x="142" y="50" width="32" height="14" rx="6" fill="#1565c0"/>
+          <circle cx="150" cy="82" r="5" fill="white"/><circle cx="167" cy="82" r="5" fill="white"/>
+          <circle cx="151" cy="83" r="3" fill="#1565c0"/><circle cx="168" cy="83" r="3" fill="#1565c0"/>
+          <path d="M146,96 Q158,104 170,96" stroke="#0d47a1" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- _delta_log label -->
+          <rect x="10" y="118" width="100" height="16" rx="4" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+          <text x="15" y="129" font-size="6" fill="#1565c0" font-weight="bold">📁 _delta_log/</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech char" style="border-color:var(--delta-blue)">
+          <div class="speech-label char-name">Delta says:</div>
+          Welcome to my library! Every write to a Delta table I record in the <strong>_delta_log</strong>. It's a JSON file tracking every add, remove, and update. Nothing escapes my records!
+        </div>
+        <p class="panel-narrative">
+          <strong>Delta Lake</strong> is an open-source storage layer that sits on top of your cloud storage (S3, ADLS, GCS). It adds transactional guarantees to regular Parquet files — turning a dumb folder of files into a proper database table.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel full" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2)">
+      <div class="panel-story" style="border:none;background:transparent">
+        <p class="panel-narrative" style="margin-bottom:1rem">The four magic guarantees Delta gives you — <strong>ACID</strong>:</p>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem">
+          <div style="background:white;border:2.5px solid #1565c0;border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-size:1.5rem">⚛️</div>
+            <div style="font-family:'Fredoka One',cursive;color:#1565c0">Atomic</div>
+            <div style="font-size:0.78rem;color:#555;margin-top:0.3rem">All or nothing. No half-written tables that leave your data broken.</div>
+          </div>
+          <div style="background:white;border:2.5px solid #1565c0;border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-size:1.5rem">🎯</div>
+            <div style="font-family:'Fredoka One',cursive;color:#1565c0">Consistent</div>
+            <div style="font-size:0.78rem;color:#555;margin-top:0.3rem">Data always moves from one valid state to another. No corrupted reads.</div>
+          </div>
+          <div style="background:white;border:2.5px solid #1565c0;border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-size:1.5rem">👁️</div>
+            <div style="font-family:'Fredoka One',cursive;color:#1565c0">Isolated</div>
+            <div style="font-size:0.78rem;color:#555;margin-top:0.3rem">Concurrent readers &amp; writers don't interfere. Snapshot isolation for all!</div>
+          </div>
+          <div style="background:white;border:2.5px solid #1565c0;border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-size:1.5rem">💾</div>
+            <div style="font-family:'Fredoka One',cursive;color:#1565c0">Durable</div>
+            <div style="font-size:0.78rem;color:#555;margin-top:0.3rem">Once committed, data survives crashes, power outages, and angry mondays.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="did-you-know">
+    <p>Delta Lake uses <strong>Optimistic Concurrency Control (OCC)</strong>. When two writers try to write at the same time, they both optimistically assume they'll succeed — but Delta validates at commit time and rejects conflicting writes. Much more efficient than locking the entire table like traditional databases!</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 6 ========== -->
+<div class="chapter bg-desert" id="ch6" style="border-top:4px dashed rgba(0,0,0,0.08)">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 6</span>
+    <div>
+      <div class="chapter-title">⏰ Time Travel — Delta's Magic Diary</div>
+      <div class="chapter-char-name">Briko accidentally deletes data... and learns it's fine</div>
+    </div>
+  </div>
+
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#fff9c4,#ffee58)">
+        <svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:240px">
+          <!-- Clock / time machine -->
+          <circle cx="100" cy="80" r="60" fill="white" stroke="#1565c0" stroke-width="4"/>
+          <!-- Clock numbers -->
+          <text x="100" y="30" font-size="10" fill="#555" text-anchor="middle">12</text>
+          <text x="100" y="136" font-size="10" fill="#555" text-anchor="middle">6</text>
+          <text x="46" y="85" font-size="10" fill="#555" text-anchor="middle">9</text>
+          <text x="153" y="85" font-size="10" fill="#555" text-anchor="middle">3</text>
+          <!-- Hands -->
+          <line x1="100" y1="80" x2="100" y2="38" stroke="#1565c0" stroke-width="3" stroke-linecap="round"/>
+          <line x1="100" y1="80" x2="128" y2="95" stroke="#ff5252" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="100" cy="80" r="6" fill="#1565c0"/>
+          <!-- Version labels around clock -->
+          <text x="145" y="55" font-size="7" fill="#1565c0" font-weight="bold">v3 (now)</text>
+          <text x="28" y="55" font-size="7" fill="#555" font-weight="bold">v2 yesterday</text>
+          <text x="28" y="115" font-size="7" fill="#555" font-weight="bold">v1 last week</text>
+          <!-- Briko looking panicked -->
+          <circle cx="156" cy="130" r="18" fill="#ffc67a"/>
+          <circle cx="150" cy="127" r="4" fill="white"/><circle cx="162" cy="127" r="4" fill="white"/>
+          <circle cx="151" cy="128" r="2.5" fill="#333"/><circle cx="163" cy="128" r="2.5" fill="#333"/>
+          <path d="M148,136 Q156,133 164,136" stroke="#a0522d" stroke-width="2" fill="none"/>
+          <!-- panic sweat -->
+          <text x="175" y="118" font-size="12">😰</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech briko">
+          <div class="speech-label">Briko panics:</div>
+          OH NO! I ran DELETE * on the customers table! 10 million rows — gone! I'm fired, I'm fired, I'm FIRED!
+        </div>
+        <div class="speech char" style="margin-top:0.75rem;border-color:var(--delta-blue)">
+          <div class="speech-label char-name">Delta calmly says:</div>
+          Breathe. I have it all. Run: <code style="background:#e3f2fd;padding:0.1rem 0.3rem;border-radius:4px;font-size:0.85rem">RESTORE TABLE customers TO VERSION AS OF 42</code>. Done. ☕
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:white;border:3px solid var(--ink);border-radius:16px;padding:1.5rem;box-shadow:4px 4px 0 rgba(0,0,0,0.1);margin:1.5rem 0">
+    <div style="font-family:'Fredoka One',cursive;font-size:1rem;color:var(--delta-blue);margin-bottom:1rem">🕰️ Time Travel SQL Commands</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div style="background:#e3f2fd;border-radius:10px;padding:1rem">
+        <div style="font-family:'Fredoka One',cursive;font-size:0.85rem;color:#0d47a1;margin-bottom:0.5rem">By Version Number</div>
+        <code style="font-size:0.78rem;color:#1a1a2e;line-height:1.8;display:block">SELECT * FROM customers<br>VERSION AS OF 42;</code>
+      </div>
+      <div style="background:#e3f2fd;border-radius:10px;padding:1rem">
+        <div style="font-family:'Fredoka One',cursive;font-size:0.85rem;color:#0d47a1;margin-bottom:0.5rem">By Timestamp</div>
+        <code style="font-size:0.78rem;color:#1a1a2e;line-height:1.8;display:block">SELECT * FROM customers<br>TIMESTAMP AS OF<br>'2024-01-15';</code>
+      </div>
+      <div style="background:#e8f5e9;border-radius:10px;padding:1rem">
+        <div style="font-family:'Fredoka One',cursive;font-size:0.85rem;color:#1b5e20;margin-bottom:0.5rem">Restore the Whole Table</div>
+        <code style="font-size:0.78rem;color:#1a1a2e;line-height:1.8;display:block">RESTORE TABLE customers<br>TO VERSION AS OF 42;</code>
+      </div>
+      <div style="background:#e8f5e9;border-radius:10px;padding:1rem">
+        <div style="font-family:'Fredoka One',cursive;font-size:0.85rem;color:#1b5e20;margin-bottom:0.5rem">See History</div>
+        <code style="font-size:0.78rem;color:#1a1a2e;line-height:1.8;display:block">DESCRIBE HISTORY<br>customers;</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="did-you-know">
+    <p><strong>VACUUM</strong> is the command that actually deletes old file versions. By default, Delta keeps 7 days of history before VACUUM can clean them. Run <code>VACUUM customers RETAIN 168 HOURS</code> to clean up. Pro tip: Never run VACUUM with 0 hours in production — you'll destroy time travel capability and possibly anger Delta very much.</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 7 ========== -->
+<div class="chapter" id="ch7" style="background:linear-gradient(180deg,#fff3e0,#ffe0b2)">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 7</span>
+    <div>
+      <div class="chapter-title">⚡ Spark the Engine Master — Core Concepts</div>
+      <div class="chapter-char-name">Briko visits the Engine Room</div>
+    </div>
+  </div>
+
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#fff8e1,#ffcc80)">
+        <svg viewBox="0 0 200 170" width="100%" height="170" style="max-width:250px">
+          <!-- Engine Room background -->
+          <rect x="0" y="0" width="200" height="170" fill="#fff8e1" rx="8"/>
+          <!-- Driver box -->
+          <rect x="70" y="10" width="60" height="35" rx="6" fill="#ff8c00" stroke="#e65100" stroke-width="2"/>
+          <text x="100" y="25" font-family="Nunito" font-size="7" fill="white" text-anchor="middle" font-weight="bold">DRIVER</text>
+          <text x="100" y="37" font-family="Nunito" font-size="6" fill="#fff3e0" text-anchor="middle">SparkContext</text>
+          <!-- Arrows down -->
+          <line x1="70" y1="47" x2="40" y2="70" stroke="#555" stroke-width="1.5"/>
+          <line x1="100" y1="47" x2="100" y2="70" stroke="#555" stroke-width="1.5"/>
+          <line x1="130" y1="47" x2="160" y2="70" stroke="#555" stroke-width="1.5"/>
+          <!-- Executor boxes -->
+          <rect x="10" y="70" width="55" height="50" rx="6" fill="#1565c0"/>
+          <text x="37" y="87" font-family="Nunito" font-size="6.5" fill="white" text-anchor="middle" font-weight="bold">EXECUTOR 1</text>
+          <rect x="18" y="93" width="16" height="10" rx="2" fill="#90caf9"/><text x="26" y="101" font-size="5" fill="#0d47a1" text-anchor="middle">Task</text>
+          <rect x="38" y="93" width="16" height="10" rx="2" fill="#90caf9"/><text x="46" y="101" font-size="5" fill="#0d47a1" text-anchor="middle">Task</text>
+          <rect x="18" y="107" width="36" height="8" rx="2" fill="#0d47a1"/><text x="36" y="114" font-size="5" fill="white" text-anchor="middle">Cache</text>
+
+          <rect x="72" y="70" width="55" height="50" rx="6" fill="#1565c0"/>
+          <text x="99" y="87" font-family="Nunito" font-size="6.5" fill="white" text-anchor="middle" font-weight="bold">EXECUTOR 2</text>
+          <rect x="80" y="93" width="16" height="10" rx="2" fill="#90caf9"/><text x="88" y="101" font-size="5" fill="#0d47a1" text-anchor="middle">Task</text>
+          <rect x="100" y="93" width="16" height="10" rx="2" fill="#90caf9"/><text x="108" y="101" font-size="5" fill="#0d47a1" text-anchor="middle">Task</text>
+          <rect x="80" y="107" width="36" height="8" rx="2" fill="#0d47a1"/><text x="98" y="114" font-size="5" fill="white" text-anchor="middle">Cache</text>
+
+          <rect x="134" y="70" width="55" height="50" rx="6" fill="#1565c0"/>
+          <text x="161" y="87" font-family="Nunito" font-size="6.5" fill="white" text-anchor="middle" font-weight="bold">EXECUTOR 3</text>
+          <rect x="142" y="93" width="16" height="10" rx="2" fill="#90caf9"/><text x="150" y="101" font-size="5" fill="#0d47a1" text-anchor="middle">Task</text>
+          <rect x="162" y="93" width="16" height="10" rx="2" fill="#90caf9"/><text x="170" y="101" font-size="5" fill="#0d47a1" text-anchor="middle">Task</text>
+          <rect x="142" y="107" width="36" height="8" rx="2" fill="#0d47a1"/><text x="160" y="114" font-size="5" fill="white" text-anchor="middle">Cache</text>
+          <!-- Data label -->
+          <text x="100" y="145" font-family="Nunito" font-size="7" fill="#555" text-anchor="middle">📦 Partitioned data split across executors</text>
+          <text x="100" y="158" font-family="Nunito" font-size="6" fill="#888" text-anchor="middle">Each processes its slice in parallel</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech char" style="border-color:var(--spark-orange)">
+          <div class="speech-label char-name">Spark explains:</div>
+          I work like a factory! The <strong>Driver</strong> is the foreman who plans the work. The <strong>Executors</strong> are the workers who actually crunch the data — all in parallel, on their own slice!
+        </div>
+        <p class="panel-narrative">
+          Spark splits your data into <strong>partitions</strong> — think of them like slices of a pizza. Each executor gets one or more slices to process at the same time. That's why Spark can handle a terabyte like it's nothing.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="arch-diagram">
+    <div class="arch-title">🔄 How Spark Processes a Query — The DAG</div>
+    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;justify-content:center">
+      <div style="background:#ff8c00;color:white;border-radius:10px;padding:0.6rem 1rem;font-size:0.78rem;font-weight:700;text-align:center">1️⃣ Your Code<br><span style="font-size:0.65rem;opacity:0.8">df.groupBy().sum()</span></div>
+      <div style="color:#999">→</div>
+      <div style="background:#1565c0;color:white;border-radius:10px;padding:0.6rem 1rem;font-size:0.78rem;font-weight:700;text-align:center">2️⃣ Catalyst<br><span style="font-size:0.65rem;opacity:0.8">Logical Plan</span></div>
+      <div style="color:#999">→</div>
+      <div style="background:#1565c0;color:white;border-radius:10px;padding:0.6rem 1rem;font-size:0.78rem;font-weight:700;text-align:center">3️⃣ Physical Plan<br><span style="font-size:0.65rem;opacity:0.8">Optimized Stages</span></div>
+      <div style="color:#999">→</div>
+      <div style="background:#7c3aed;color:white;border-radius:10px;padding:0.6rem 1rem;font-size:0.78rem;font-weight:700;text-align:center">4️⃣ DAG Scheduler<br><span style="font-size:0.65rem;opacity:0.8">Tasks to Executors</span></div>
+      <div style="color:#999">→</div>
+      <div style="background:#00897b;color:white;border-radius:10px;padding:0.6rem 1rem;font-size:0.78rem;font-weight:700;text-align:center">5️⃣ Result ✅<br><span style="font-size:0.65rem;opacity:0.8">Back to Driver</span></div>
+    </div>
+  </div>
+
+  <div class="did-you-know">
+    <p>Spark DataFrames are <strong>lazy</strong> — when you write <code>df.filter(...).groupBy(...)</code>, nothing actually runs. Spark just builds a plan. Only when you call <code>.show()</code>, <code>.count()</code>, or <code>.write()</code> does it actually execute. This lets Catalyst optimize the whole plan before touching a single byte of data!</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 9 ========== -->
+<div class="chapter bg-desert" id="ch9">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 9</span>
+    <div>
+      <div class="chapter-title">⚡⚡ Photon the Speed Wizard</div>
+      <div class="chapter-char-name">When even Spark isn't fast enough</div>
+    </div>
+  </div>
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#fffde7,#fff176)">
+        <svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:240px">
+          <!-- Racing track -->
+          <ellipse cx="100" cy="120" rx="85" ry="30" fill="none" stroke="#ccc" stroke-width="6" stroke-dasharray="10,5"/>
+          <!-- Spark car (slow) -->
+          <rect x="20" y="100" width="50" height="25" rx="6" fill="#ff8c00"/>
+          <text x="45" y="116" font-family="Nunito" font-size="7" fill="white" text-anchor="middle" font-weight="bold">Spark JVM</text>
+          <circle cx="30" cy="126" r="6" fill="#333"/>
+          <circle cx="60" cy="126" r="6" fill="#333"/>
+          <!-- Speed lines from Photon -->
+          <line x1="130" y1="105" x2="100" y2="105" stroke="#ffd600" stroke-width="2" opacity="0.5"/>
+          <line x1="130" y1="110" x2="95" y2="110" stroke="#ffd600" stroke-width="3" opacity="0.7"/>
+          <line x1="130" y1="115" x2="100" y2="115" stroke="#ffd600" stroke-width="2" opacity="0.5"/>
+          <!-- Photon car (zooming) -->
+          <rect x="135" y="98" width="55" height="25" rx="6" fill="#ffd600" stroke="#ff8f00" stroke-width="2"/>
+          <text x="162" y="114" font-family="Nunito" font-size="7" fill="#333" text-anchor="middle" font-weight="bold">Photon C++</text>
+          <circle cx="145" cy="124" r="6" fill="#333"/>
+          <circle cx="180" cy="124" r="6" fill="#333"/>
+          <!-- Flash -->
+          <path d="M165,30 L150,60 L162,60 L147,90 L175,55 L162,55Z" fill="#ffd600" stroke="#ff8f00" stroke-width="1.5"/>
+          <!-- Labels -->
+          <text x="45" y="92" font-family="Nunito" font-size="7" fill="#888" text-anchor="middle">~1x speed</text>
+          <text x="162" y="92" font-family="Nunito" font-size="7" fill="#ff8f00" text-anchor="middle" font-weight="bold">🚀 8x faster!</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech char" style="border-color:#e65100">
+          <div class="speech-label char-name">Photon boasts:</div>
+          Spark runs on the JVM — great but not peak performance. I'm rewritten in <strong>native C++</strong>. I use vectorized processing, SIMD instructions, and I laugh at your CPU cores. 😎
+        </div>
+        <p class="panel-narrative">
+          <strong>Photon</strong> is Databricks' proprietary query engine. It's drop-in compatible with Spark SQL — same API, same DataFrames — but uses a C++ engine under the hood that's up to <strong>8x faster</strong> for analytical SQL workloads. No code changes needed.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="did-you-know">
+    <p>Photon uses <strong>vectorized execution</strong> — instead of processing one row at a time (traditional), it processes batches of 1000s of values simultaneously using CPU SIMD (Single Instruction, Multiple Data) instructions. It's like the difference between counting pennies one-by-one vs weighing the whole pile on a scale.</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 11 ========== -->
+<div class="chapter bg-forest" id="ch11">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 11</span>
+    <div>
+      <div class="chapter-title">🥉🥈🥇 The Medallion Kingdom</div>
+      <div class="chapter-char-name">Briko tours Bronze, Silver, and Gold lands</div>
+    </div>
+  </div>
+
+  <div class="story-panels">
+    <div class="panel full" style="background:linear-gradient(135deg,#f5f5f5,#e0e0e0)">
+      <div class="panel-story" style="border:none;background:transparent">
+        <div class="speech briko" style="margin-bottom:1rem">
+          <div class="speech-label">Briko asks:</div>
+          There are THREE kingdoms? How do I know which one to store my data in?
+        </div>
+        <div class="speech char" style="border-color:var(--flow-teal)">
+          <div class="speech-label char-name">Flow explains:</div>
+          Think of it like refining gold! Raw ore comes in as <strong>Bronze</strong>. We clean it into <strong>Silver</strong>. We process it into pure <strong>Gold</strong> that analysts love. Each layer adds trust!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="medallion">
+    <div class="medallion-layer bronze">
+      <div style="font-size:2rem">🥉</div>
+      <h4>Bronze Layer</h4>
+      <div style="font-size:0.75rem;color:#8d6e63;font-weight:700;margin-bottom:0.5rem">RAW INGESTION</div>
+      <ul>
+        <li>💾 Raw, unmodified data</li>
+        <li>📥 Direct from sources</li>
+        <li>🔒 Immutable append-only</li>
+        <li>📅 Source timestamps kept</li>
+        <li>🗃️ All formats: JSON, CSV, Parquet</li>
+        <li>✅ Schema-on-read</li>
+      </ul>
+      <div style="margin-top:0.75rem;font-size:0.72rem;color:#a1887f;font-style:italic">"Accept everything. Judge nothing. Yet."</div>
+    </div>
+    <div style="display:flex;align-items:center;font-size:1.5rem;color:#999">→</div>
+    <div class="medallion-layer silver">
+      <div style="font-size:2rem">🥈</div>
+      <h4>Silver Layer</h4>
+      <div style="font-size:0.75rem;color:#616161;font-weight:700;margin-bottom:0.5rem">CLEANSED DATA</div>
+      <ul>
+        <li>🧹 Deduplicated records</li>
+        <li>📐 Standardized schemas</li>
+        <li>✨ Business rules applied</li>
+        <li>🔗 Joined with lookups</li>
+        <li>✅ Schema enforcement</li>
+        <li>🔍 Quality checks passed</li>
+      </ul>
+      <div style="margin-top:0.75rem;font-size:0.72rem;color:#757575;font-style:italic">"Clean enough for analysts. Not yet perfect."</div>
+    </div>
+    <div style="display:flex;align-items:center;font-size:1.5rem;color:#999">→</div>
+    <div class="medallion-layer gold">
+      <div style="font-size:2rem">🥇</div>
+      <h4>Gold Layer</h4>
+      <div style="font-size:0.75rem;color:#f57f17;font-weight:700;margin-bottom:0.5rem">BUSINESS-READY</div>
+      <ul>
+        <li>📊 Aggregated metrics</li>
+        <li>🏪 Domain-specific data marts</li>
+        <li>🤖 ML feature tables</li>
+        <li>📈 Executive dashboards</li>
+        <li>⚡ Optimized for queries</li>
+        <li>💼 Business terminology</li>
+      </ul>
+      <div style="margin-top:0.75rem;font-size:0.72rem;color:#f57f17;font-style:italic">"What the CFO actually wants to see."</div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h4>🏦 Real World: Financial Services</h4>
+    <p><strong>Bronze:</strong> Raw trade events from 50 trading systems — 200M events/day, JSON format, no validation. <strong>Silver:</strong> Deduplicated, enriched with counterparty data, validated against regulatory schema. <strong>Gold:</strong> Daily P&amp;L by desk, risk exposure by asset class, ready for regulatory reporting in 30 minutes.</p>
+  </div>
+
+  <div class="did-you-know">
+    <p>The Medallion Architecture was popularized by Databricks but is now an industry-wide pattern. The key insight: <strong>never transform in place</strong>. Always write to a new layer. This means you can always re-process from any layer if a bug is found. Bronze is your safety net — keep it forever (it's cheap in object storage)!</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 12 ========== -->
+<div class="chapter bg-teal" id="ch12">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 12</span>
+    <div>
+      <div class="chapter-title">🔧 Flow the Pipeline Engineer</div>
+      <div class="chapter-char-name">Delta Live Tables and the art of declarative pipelines</div>
+    </div>
+  </div>
+
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#e0f2f1,#80cbc4)">
+        <svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:250px">
+          <!-- Pipeline flow diagram -->
+          <rect x="5" y="60" width="35" height="28" rx="6" fill="#00897b"/>
+          <text x="22" y="77" font-size="6" fill="white" text-anchor="middle" font-weight="bold">Raw</text>
+          <text x="22" y="86" font-size="5" fill="#b2dfdb" text-anchor="middle">Bronze</text>
+          <!-- Pipe 1 -->
+          <rect x="40" y="71" width="20" height="8" rx="4" fill="#00695c"/>
+          <circle cx="58" cy="75" r="4" fill="#ffd600"/>
+          <!-- Arrow -->
+          <polygon points="58,70 66,75 58,80" fill="#ff8c00"/>
+          <!-- Silver box -->
+          <rect x="66" y="55" width="42" height="38" rx="6" fill="#00796b"/>
+          <text x="87" y="72" font-size="6" fill="white" text-anchor="middle" font-weight="bold">Cleanse</text>
+          <text x="87" y="81" font-size="5" fill="#b2dfdb" text-anchor="middle">+ Dedup</text>
+          <text x="87" y="89" font-size="5" fill="#80cbc4" text-anchor="middle">Silver</text>
+          <!-- Pipe 2 -->
+          <rect x="108" y="71" width="20" height="8" rx="4" fill="#00695c"/>
+          <polygon points="126,70 134,75 126,80" fill="#ff8c00"/>
+          <!-- Gold box -->
+          <rect x="134" y="52" width="44" height="44" rx="6" fill="#004d40"/>
+          <text x="156" y="72" font-size="6" fill="white" text-anchor="middle" font-weight="bold">Aggregate</text>
+          <text x="156" y="82" font-size="5" fill="#80cbc4" text-anchor="middle">+ Join</text>
+          <text x="156" y="91" font-size="5" fill="#ffd600" text-anchor="middle">Gold ⭐</text>
+          <!-- DLT label -->
+          <rect x="40" y="108" width="140" height="16" rx="5" fill="#004d40"/>
+          <text x="110" y="120" font-size="7" fill="#80cbc4" text-anchor="middle" font-weight="bold">Managed by Delta Live Tables</text>
+          <!-- Checkmarks (expectations) -->
+          <text x="87" y="105" font-size="9" text-anchor="middle">✅</text>
+          <text x="156" y="108" font-size="9" text-anchor="middle">✅</text>
+          <!-- Flow character small -->
+          <circle cx="22" cy="130" r="14" fill="#ffc67a"/>
+          <ellipse cx="22" cy="148" rx="14" ry="10" fill="#00897b"/>
+          <text x="22" y="162" font-size="6" fill="#555" text-anchor="middle">Flow</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech char" style="border-color:var(--flow-teal)">
+          <div class="speech-label char-name">Flow says:</div>
+          Old-school pipelines were IMPERATIVE — you wrote EVERY step. Delta Live Tables are <strong>DECLARATIVE</strong> — you just say what you want, and I figure out the order, retries, and monitoring. Chef's kiss! 👨‍🍳
+        </div>
+        <p class="panel-narrative">
+          <strong>Delta Live Tables (DLT)</strong> lets you define pipelines as SQL or Python tables with <code>@dlt.table</code> decorators. DLT automatically builds the dependency graph, handles failures, enforces data quality with <strong>Expectations</strong>, and updates the tables in order.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:white;border:3px solid var(--flow-teal);border-radius:16px;padding:1.5rem;box-shadow:4px 4px 0 rgba(0,0,0,0.1);margin:1.5rem 0">
+    <div style="font-family:'Fredoka One',cursive;font-size:1rem;color:var(--flow-teal);margin-bottom:1rem">💻 DLT Pipeline Code Example</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div style="background:#e0f2f1;border-radius:10px;padding:1rem">
+        <div style="font-family:'Fredoka One',cursive;font-size:0.8rem;color:#004d40;margin-bottom:0.5rem">Bronze — Raw Ingestion</div>
+        <code style="font-size:0.72rem;color:#1a1a2e;line-height:1.8;display:block;white-space:pre">@dlt.table(comment="Raw orders")
+def bronze_orders():
+  return (spark.readStream
+    .format("cloudFiles")
+    .option("format","json")
+    .load("s3://raw/orders/"))</code>
+      </div>
+      <div style="background:#e0f2f1;border-radius:10px;padding:1rem">
+        <div style="font-family:'Fredoka One',cursive;font-size:0.8rem;color:#004d40;margin-bottom:0.5rem">Silver — With Expectations</div>
+        <code style="font-size:0.72rem;color:#1a1a2e;line-height:1.8;display:block;white-space:pre">@dlt.expect("valid_amount",
+  "amount > 0")
+@dlt.table
+def silver_orders():
+  return (dlt.read_stream(
+    "bronze_orders")
+    .where("status != 'cancelled'")
+    .dropDuplicates(["order_id"]))</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="did-you-know">
+    <p>DLT <strong>Expectations</strong> are data quality rules that can either drop bad rows, quarantine them, or fail the pipeline. Unlike writing manual quality checks, DLT tracks quality metrics over time and surfaces them in a built-in pipeline graph UI — so you can see exactly where bad data entered your lakehouse.</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 14 ========== -->
+<div class="chapter" id="ch14" style="background:linear-gradient(180deg,#e8eaf6,#c5cae9)">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 14</span>
+    <div>
+      <div class="chapter-title">🌊 Structured Streaming — The River of Now</div>
+      <div class="chapter-char-name">When data never stops flowing</div>
+    </div>
+  </div>
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#e8eaf6,#9fa8da)">
+        <svg viewBox="0 0 200 150" width="100%" height="150" style="max-width:240px">
+          <!-- River of data -->
+          <path d="M0,60 Q50,50 100,65 Q150,80 200,65" stroke="#3f51b5" stroke-width="20" fill="none" opacity="0.3"/>
+          <path d="M0,65 Q50,55 100,70 Q150,85 200,70" stroke="#5c6bc0" stroke-width="10" fill="none" opacity="0.5"/>
+          <!-- Data packets flowing -->
+          <rect x="15" y="57" width="16" height="10" rx="3" fill="#ffd600"/><text x="23" y="65" font-size="5" fill="#333" text-anchor="middle">event</text>
+          <rect x="55" y="60" width="16" height="10" rx="3" fill="#ff5252"/><text x="63" y="68" font-size="5" fill="white" text-anchor="middle">msg</text>
+          <rect x="95" y="63" width="16" height="10" rx="3" fill="#4caf50"/><text x="103" y="71" font-size="5" fill="white" text-anchor="middle">click</text>
+          <rect x="140" y="60" width="16" height="10" rx="3" fill="#ff8c00"/><text x="148" y="68" font-size="5" fill="white" text-anchor="middle">trade</text>
+          <!-- Sources -->
+          <text x="100" y="18" font-family="Nunito" font-size="7" fill="#555" text-anchor="middle" font-weight="bold">Streaming Sources</text>
+          <rect x="15" y="20" width="30" height="16" rx="4" fill="#ff5252"/><text x="30" y="31" font-size="6" fill="white" text-anchor="middle">Kafka</text>
+          <rect x="55" y="20" width="40" height="16" rx="4" fill="#7c3aed"/><text x="75" y="31" font-size="6" fill="white" text-anchor="middle">Event Hubs</text>
+          <rect x="105" y="20" width="35" height="16" rx="4" fill="#ff8c00"/><text x="122" y="31" font-size="6" fill="white" text-anchor="middle">Kinesis</text>
+          <rect x="150" y="20" width="40" height="16" rx="4" fill="#00897b"/><text x="170" y="31" font-size="6" fill="white" text-anchor="middle">CloudFiles</text>
+          <!-- Micro-batch -->
+          <rect x="40" y="95" width="120" height="40" rx="8" fill="#3f51b5"/>
+          <text x="100" y="110" font-family="Nunito" font-size="7" fill="white" text-anchor="middle" font-weight="bold">Spark Structured Streaming</text>
+          <text x="100" y="122" font-family="Nunito" font-size="6" fill="#c5cae9" text-anchor="middle">Micro-batch every N seconds</text>
+          <text x="100" y="132" font-family="Nunito" font-size="6" fill="#9fa8da" text-anchor="middle">→ Delta Lake (Exactly-once ✅)</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech briko">
+          <div class="speech-label">Briko asks:</div>
+          So batch processing reads a big file… but streaming processes data as it ARRIVES? Like, continuously?
+        </div>
+        <div class="speech char" style="margin-top:0.75rem;border-color:#3f51b5">
+          <div class="speech-label char-name">Spark nods:</div>
+          Exactly! Structured Streaming treats a stream as an infinite table being appended to. You write a normal batch query — I run it repeatedly as new data arrives. Same API. Magic results! ✨
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="did-you-know">
+    <p><strong>Watermarking</strong> handles late-arriving data in streams. If an IoT sensor sends data 10 minutes late (network delay), your stream needs to know how long to wait before considering a window "closed". Set <code>.withWatermark("eventTime", "10 minutes")</code> and Spark will wait 10 minutes after the window ends before finalizing aggregations. Essential for real-world streaming!</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 15 ========== -->
+<div class="chapter bg-lake" id="ch15">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 15</span>
+    <div>
+      <div class="chapter-title">🔮 Databricks SQL — The Crystal Ball Room</div>
+      <div class="chapter-char-name">Where analysts finally get what they want</div>
+    </div>
+  </div>
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#e3f2fd,#90caf9)">
+        <svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:240px">
+          <!-- SQL Warehouse types -->
+          <rect x="10" y="20" width="50" height="45" rx="8" fill="#00897b"/>
+          <text x="35" y="40" font-size="7" fill="white" text-anchor="middle" font-weight="bold">Serverless</text>
+          <text x="35" y="52" font-size="6" fill="#b2dfdb" text-anchor="middle">SQL WH</text>
+          <text x="35" y="62" font-size="5" fill="#80cbc4" text-anchor="middle">No cluster mgmt</text>
+          <rect x="75" y="20" width="50" height="45" rx="8" fill="#1565c0"/>
+          <text x="100" y="40" font-size="7" fill="white" text-anchor="middle" font-weight="bold">Pro SQL</text>
+          <text x="100" y="52" font-size="6" fill="#90caf9" text-anchor="middle">Warehouse</text>
+          <text x="100" y="62" font-size="5" fill="#64b5f6" text-anchor="middle">Full + Photon</text>
+          <rect x="140" y="20" width="50" height="45" rx="8" fill="#7c3aed"/>
+          <text x="165" y="40" font-size="7" fill="white" text-anchor="middle" font-weight="bold">Classic</text>
+          <text x="165" y="52" font-size="6" fill="#d8b4fe" text-anchor="middle">SQL WH</text>
+          <text x="165" y="62" font-size="5" fill="#a78bfa" text-anchor="middle">Budget option</text>
+          <!-- Arrow down -->
+          <text x="100" y="80" font-size="12" text-anchor="middle" fill="#555">⬇️</text>
+          <!-- Crystal ball -->
+          <circle cx="100" cy="125" r="35" fill="rgba(100,181,246,0.3)" stroke="#1565c0" stroke-width="2"/>
+          <circle cx="100" cy="125" r="25" fill="rgba(255,255,255,0.5)"/>
+          <text x="100" y="120" font-size="8" text-anchor="middle" fill="#1565c0" font-weight="bold">Photon</text>
+          <text x="100" y="131" font-size="7" text-anchor="middle" fill="#555">SQL Engine</text>
+          <ellipse cx="100" cy="158" rx="35" ry="8" fill="rgba(0,0,0,0.1)"/>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <p class="panel-narrative">
+          <strong>Databricks SQL</strong> is the analyst's home. No Spark, no Python — just pure SQL against your Delta Lake tables. Three warehouse types give you flexibility from <strong>instant-on serverless</strong> to <strong>cost-optimized classic</strong>.
+        </p>
+        <div class="speech char" style="border-color:var(--delta-blue)">
+          <div class="speech-label char-name">A Photon-powered voice says:</div>
+          Every query runs through me — Photon. I optimize, vectorize, and accelerate. Analysts think it's magic. Architects know it's C++. 😏
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="did-you-know">
+    <p><strong>Query Profiles</strong> in Databricks SQL are like X-rays for your queries. They show exactly where time is spent — network shuffles, scan sizes, join strategies. When a dashboard feels slow, open the Query Profile before blaming the data or the BI tool. 90% of the time the fix is a missing Z-Order or a bad join key.</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 16 ========== -->
+<div class="chapter bg-city" id="ch16">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 16</span>
+    <div>
+      <div class="chapter-title">🛡️ Unity the Guardian — Governance &amp; Security</div>
+      <div class="chapter-char-name">One catalog to rule them all</div>
+    </div>
+  </div>
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#f3e5f5,#ce93d8)">
+        <svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:250px">
+          <!-- Unity Catalog hierarchy -->
+          <rect x="65" y="5" width="70" height="22" rx="6" fill="#7c3aed"/>
+          <text x="100" y="20" font-size="8" fill="white" text-anchor="middle" font-weight="bold">Unity Catalog</text>
+          <!-- Lines down -->
+          <line x1="100" y1="27" x2="50" y2="48" stroke="#7c3aed" stroke-width="1.5"/>
+          <line x1="100" y1="27" x2="100" y2="48" stroke="#7c3aed" stroke-width="1.5"/>
+          <line x1="100" y1="27" x2="150" y2="48" stroke="#7c3aed" stroke-width="1.5"/>
+          <!-- Catalogs -->
+          <rect x="20" y="48" width="55" height="18" rx="5" fill="#a855f7"/>
+          <text x="47" y="60" font-size="6.5" fill="white" text-anchor="middle" font-weight="bold">finance_catalog</text>
+          <rect x="72" y="48" width="55" height="18" rx="5" fill="#a855f7"/>
+          <text x="99" y="60" font-size="6.5" fill="white" text-anchor="middle" font-weight="bold">sales_catalog</text>
+          <rect x="124" y="48" width="55" height="18" rx="5" fill="#a855f7"/>
+          <text x="151" y="60" font-size="6.5" fill="white" text-anchor="middle" font-weight="bold">ml_catalog</text>
+          <!-- Lines to schemas -->
+          <line x1="47" y1="66" x2="30" y2="88" stroke="#ce93d8" stroke-width="1.2"/>
+          <line x1="47" y1="66" x2="62" y2="88" stroke="#ce93d8" stroke-width="1.2"/>
+          <!-- Schemas -->
+          <rect x="12" y="88" width="36" height="14" rx="4" fill="#d8b4fe"/>
+          <text x="30" y="98" font-size="5.5" fill="#4c1d95" text-anchor="middle" font-weight="bold">revenue</text>
+          <rect x="52" y="88" width="36" height="14" rx="4" fill="#d8b4fe"/>
+          <text x="70" y="98" font-size="5.5" fill="#4c1d95" text-anchor="middle" font-weight="bold">expense</text>
+          <!-- Tables -->
+          <rect x="8" y="108" width="38" height="12" rx="3" fill="#f3e5f5" stroke="#7c3aed" stroke-width="1"/>
+          <text x="27" y="117" font-size="5" fill="#7c3aed" text-anchor="middle">📋 orders</text>
+          <rect x="50" y="108" width="42" height="12" rx="3" fill="#f3e5f5" stroke="#7c3aed" stroke-width="1"/>
+          <text x="71" y="117" font-size="5" fill="#7c3aed" text-anchor="middle">📋 customers</text>
+          <!-- Lineage arrow -->
+          <path d="M90,120 Q100,130 110,120" stroke="#ff8c00" stroke-width="2" fill="none" stroke-dasharray="3,2" marker-end="url(#a2)"/>
+          <defs><marker id="a2" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5Z" fill="#ff8c00"/></marker></defs>
+          <text x="100" y="145" font-size="6" fill="#ff8c00" text-anchor="middle">Data Lineage 📊</text>
+          <!-- Lock icons -->
+          <text x="165" y="85" font-size="16">🔒</text>
+          <text x="165" y="108" font-size="10">🏷️</text>
+          <text x="165" y="128" font-size="10">👁️</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech char" style="border-color:var(--unity-purple)">
+          <div class="speech-label char-name">Unity declares:</div>
+          Before me, every workspace was a silo. Different security models, no lineage, no search. Now I am the <strong>single source of truth</strong> for all data governance across every workspace and every cloud!
+        </div>
+        <p class="panel-narrative">
+          <strong>Unity Catalog</strong> provides a 3-level namespace: <code>catalog.schema.table</code>. Every table, view, function, and volume lives here. Unity handles RBAC, column-level security, row filters, data masking, audit logs, and data lineage — centrally.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="did-you-know">
+    <p><strong>Data Lineage</strong> in Unity Catalog automatically tracks which tables feed which downstream tables — without any configuration. Query a view, and Unity has already tracked: "this view reads from table X which was loaded from pipeline Y which reads from source Z." This is enormously valuable for <strong>impact analysis</strong> — before you change a source table, Unity can show you everything downstream that would break.</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 17 ========== -->
+<div class="chapter bg-pink" id="ch17">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 17</span>
+    <div>
+      <div class="chapter-title">🧠 Milo the Scientist — Machine Learning</div>
+      <div class="chapter-char-name">Models, experiments, and the Feature Store</div>
+    </div>
+  </div>
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#fce4ec,#f48fb1)">
+        <svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:250px">
+          <!-- ML Platform diagram -->
+          <!-- Data in -->
+          <rect x="5" y="65" width="35" height="28" rx="6" fill="#00897b"/>
+          <text x="22" y="77" font-size="5.5" fill="white" text-anchor="middle" font-weight="bold">Feature</text>
+          <text x="22" y="86" font-size="5.5" fill="white" text-anchor="middle" font-weight="bold">Store</text>
+          <polygon points="40,72 48,79 40,86" fill="#e91e8c"/>
+          <!-- Training -->
+          <rect x="50" y="55" width="50" height="48" rx="6" fill="#e91e8c"/>
+          <text x="75" y="73" font-size="6.5" fill="white" text-anchor="middle" font-weight="bold">Model</text>
+          <text x="75" y="83" font-size="6.5" fill="white" text-anchor="middle" font-weight="bold">Training</text>
+          <text x="75" y="96" font-size="5" fill="#f8bbd0" text-anchor="middle">AutoML · Distributed</text>
+          <polygon points="100,72 108,79 100,86" fill="#880e4f"/>
+          <!-- MLflow -->
+          <rect x="110" y="50" width="50" height="58" rx="6" fill="#880e4f"/>
+          <text x="135" y="68" font-size="6" fill="white" text-anchor="middle" font-weight="bold">MLflow</text>
+          <text x="135" y="78" font-size="5" fill="#f8bbd0" text-anchor="middle">Experiments</text>
+          <text x="135" y="88" font-size="5" fill="#f8bbd0" text-anchor="middle">Model Registry</text>
+          <text x="135" y="98" font-size="5" fill="#f8bbd0" text-anchor="middle">Artifact Store</text>
+          <polygon points="160,72 168,79 160,86" fill="#e91e8c"/>
+          <!-- Serving -->
+          <rect x="165" y="55" width="30" height="48" rx="6" fill="#ad1457"/>
+          <text x="180" y="73" font-size="5.5" fill="white" text-anchor="middle" font-weight="bold">Model</text>
+          <text x="180" y="83" font-size="5.5" fill="white" text-anchor="middle" font-weight="bold">Serving</text>
+          <text x="180" y="93" font-size="5" fill="#f8bbd0" text-anchor="middle">REST API</text>
+          <!-- Milo small -->
+          <circle cx="75" cy="148" r="10" fill="#ffc67a"/>
+          <ellipse cx="75" cy="158" rx="10" ry="7" fill="#e91e8c"/>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech char" style="border-color:var(--ml-pink)">
+          <div class="speech-label char-name">Milo explains excitedly:</div>
+          The ML lifecycle is: get <strong>features</strong> from the Feature Store, <strong>train</strong> a model (tracking everything in MLflow!), <strong>register</strong> it, then <strong>serve</strong> predictions via REST API. It's beautiful! 🧬
+        </div>
+        <p class="panel-narrative">
+          <strong>Feature Store</strong> solves training-serving skew — the #1 source of ML bugs. Train your model with features computed by the same pipeline that computes them at serving time. No more "but it worked in the notebook!" disasters.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="scenario">
+    <h4>🛡️ Real World: Fraud Detection</h4>
+    <p>A bank trains a fraud model using 200+ features from the Feature Store (transaction velocity, merchant risk score, device fingerprint). The model scores 50K transactions/second via real-time serving. When the fraud team discovers a new fraud pattern, they retrain — the Feature Store ensures training and production data are identical. Model accuracy: 99.2%.</p>
+  </div>
+  <div class="did-you-know">
+    <p><strong>AutoML</strong> in Databricks automatically tries dozens of algorithms, hyperparameters, and feature engineering strategies — and generates a notebook showing the winning approach with all the code. It's not a black box — you can see, modify, and extend everything it tried. Great for rapidly prototyping before investing in custom model development.</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 19 ========== -->
+<div class="chapter bg-teal" id="ch19">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 19</span>
+    <div>
+      <div class="chapter-title">🤝 Shard the Sharer — Delta Sharing</div>
+      <div class="chapter-char-name">Sending data beyond the lakehouse walls</div>
+    </div>
+  </div>
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#e0f2f1,#80cbc4)">
+        <svg viewBox="0 0 200 150" width="100%" height="150" style="max-width:240px">
+          <!-- Provider side -->
+          <rect x="5" y="30" width="80" height="90" rx="8" fill="#004d40" opacity="0.9"/>
+          <text x="45" y="50" font-size="7" fill="white" text-anchor="middle" font-weight="bold">PROVIDER</text>
+          <text x="45" y="62" font-size="6" fill="#80cbc4" text-anchor="middle">(NexaCorp)</text>
+          <rect x="15" y="70" width="60" height="14" rx="4" fill="#00897b"/>
+          <text x="45" y="80" font-size="5.5" fill="white" text-anchor="middle">📊 customers table</text>
+          <rect x="15" y="88" width="60" height="14" rx="4" fill="#00897b"/>
+          <text x="45" y="98" font-size="5.5" fill="white" text-anchor="middle">📊 inventory view</text>
+          <text x="45" y="116" font-size="6" fill="#ffd600" text-anchor="middle">🔒 Share Object</text>
+          <!-- Arrow -->
+          <path d="M85,75 Q100,65 115,75" stroke="#ffd600" stroke-width="3" fill="none" marker-end="url(#a3)"/>
+          <defs><marker id="a3" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5Z" fill="#ffd600"/></marker></defs>
+          <text x="100" y="60" font-size="6" fill="#ffd600" text-anchor="middle" font-weight="bold">HTTPS</text>
+          <text x="100" y="50" font-size="6" fill="#888" text-anchor="middle">No copy!</text>
+          <!-- Recipient side -->
+          <rect x="115" y="30" width="80" height="90" rx="8" fill="#1a237e" opacity="0.9"/>
+          <text x="155" y="50" font-size="7" fill="white" text-anchor="middle" font-weight="bold">RECIPIENT</text>
+          <text x="155" y="62" font-size="6" fill="#9fa8da" text-anchor="middle">(PartnerCo)</text>
+          <text x="155" y="80" font-size="6" fill="#c5cae9" text-anchor="middle">Any platform:</text>
+          <text x="155" y="92" font-size="6" fill="#90caf9" text-anchor="middle">Spark / pandas</text>
+          <text x="155" y="104" font-size="6" fill="#90caf9" text-anchor="middle">Power BI / Tableau</text>
+          <text x="155" y="115" font-size="6" fill="#90caf9" text-anchor="middle">Snowflake / Redshift</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <div class="speech char" style="border-color:#009688">
+          <div class="speech-label char-name">Shard explains:</div>
+          Delta Sharing is an <strong>open protocol</strong>. Your partner doesn't need Databricks! They can read your shared data using pandas, Spark, Power BI, or even Tableau. No data copy. No vendor lock-in. Just a secure HTTPS endpoint! 🌐
+        </div>
+        <p class="panel-narrative">
+          The provider defines a <strong>Share</strong> (a collection of tables/views), adds <strong>Recipients</strong> (who gets access), and shares a signed token. Recipients query live data directly — no ETL, no copies, no stale exports.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="did-you-know">
+    <p>Delta Sharing is fully open-source and governed by the Linux Foundation. This means data sharing works across Databricks, Snowflake, Google BigQuery, and any system with a Delta Sharing client. It's the first truly <strong>vendor-neutral data sharing protocol</strong> — finally, a format that doesn't require your partners to use the same platform as you!</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 21 ========== -->
+<div class="chapter bg-desert" id="ch21">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 21</span>
+    <div>
+      <div class="chapter-title">⏰ Jobs &amp; Workflows — The Scheduler's Tower</div>
+      <div class="chapter-char-name">Making things run automatically</div>
+    </div>
+  </div>
+  <div class="story-panels">
+    <div class="panel">
+      <div class="panel-art" style="background:linear-gradient(135deg,#fff8e1,#ffe082)">
+        <svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:240px">
+          <!-- Tower clock -->
+          <rect x="70" y="5" width="60" height="80" rx="6" fill="#795548"/>
+          <rect x="75" y="10" width="50" height="55" rx="4" fill="#5d4037"/>
+          <!-- Clock face -->
+          <circle cx="100" cy="37" r="18" fill="white" stroke="#795548" stroke-width="2"/>
+          <line x1="100" y1="37" x2="100" y2="24" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+          <line x1="100" y1="37" x2="108" y2="42" stroke="#e91e8c" stroke-width="2" stroke-linecap="round"/>
+          <!-- Roof -->
+          <polygon points="65,5 100,0 135,5" fill="#4e342e"/>
+          <!-- Task blocks flowing -->
+          <rect x="5" y="100" width="40" height="18" rx="5" fill="#ff8c00"/>
+          <text x="25" y="112" font-size="6" fill="white" text-anchor="middle" font-weight="bold">Ingest</text>
+          <polygon points="45,104 53,109 45,114" fill="#555"/>
+          <rect x="55" y="100" width="40" height="18" rx="5" fill="#1565c0"/>
+          <text x="75" y="112" font-size="6" fill="white" text-anchor="middle" font-weight="bold">Transform</text>
+          <polygon points="95,104 103,109 95,114" fill="#555"/>
+          <rect x="105" y="100" width="40" height="18" rx="5" fill="#7c3aed"/>
+          <text x="125" y="112" font-size="6" fill="white" text-anchor="middle" font-weight="bold">ML Train</text>
+          <polygon points="145,104 153,109 145,114" fill="#555"/>
+          <rect x="155" y="100" width="40" height="18" rx="5" fill="#00897b"/>
+          <text x="175" y="112" font-size="6" fill="white" text-anchor="middle" font-weight="bold">Report</text>
+          <!-- Fan-out after transform -->
+          <line x1="75" y1="118" x2="55" y2="133" stroke="#1565c0" stroke-width="1.5"/>
+          <line x1="75" y1="118" x2="75" y2="133" stroke="#1565c0" stroke-width="1.5"/>
+          <line x1="75" y1="118" x2="95" y2="133" stroke="#1565c0" stroke-width="1.5"/>
+          <rect x="42" y="133" width="25" height="12" rx="3" fill="#42a5f5"/>
+          <text x="54" y="142" font-size="5" fill="white" text-anchor="middle">Sub-task A</text>
+          <rect x="63" y="133" width="25" height="12" rx="3" fill="#42a5f5"/>
+          <text x="75" y="142" font-size="5" fill="white" text-anchor="middle">Sub-task B</text>
+          <rect x="84" y="133" width="25" height="12" rx="3" fill="#42a5f5"/>
+          <text x="96" y="142" font-size="5" fill="white" text-anchor="middle">Sub-task C</text>
+          <!-- Cron -->
+          <rect x="155" y="130" width="40" height="14" rx="4" fill="#ff5252"/>
+          <text x="175" y="140" font-size="5.5" fill="white" text-anchor="middle">⏰ Cron / Event</text>
+        </svg>
+      </div>
+      <div class="panel-story">
+        <p class="panel-narrative">
+          <strong>Databricks Workflows</strong> orchestrates multi-task jobs as a DAG (Directed Acyclic Graph). Each task can be a notebook, Python script, DLT pipeline, SQL query, or even a dbt job. Tasks can run in parallel or sequence, with dependency declarations.
+        </p>
+        <div class="speech briko">
+          <div class="speech-label">Briko grins:</div>
+          So I can chain: "Load data → run pipeline → train model → send Slack alert" — all automated, all retried if it fails? That's incredible!
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="did-you-know">
+    <p>Databricks Workflows supports <strong>event-based triggers</strong> — not just cron schedules. A file arriving in S3 can trigger a pipeline. A webhook from GitHub can trigger a CI/CD test. The job system also tracks full run history, has per-task retry policies, and sends alerts to Slack, email, or PagerDuty when things go sideways.</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 22 ========== -->
+<div class="chapter" id="ch22" style="background:linear-gradient(180deg,#e8eaf6,#c5cae9)">
+  <div class="chapter-banner">
+    <span class="chapter-num-badge">Chapter 22</span>
+    <div>
+      <div class="chapter-title">🔩 DevOps — Terraforming the Lakehouse</div>
+      <div class="chapter-char-name">Infrastructure as Code for grown-up data teams</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem">
+    <div style="background:white;border:2.5px solid #3f51b5;border-radius:14px;padding:1.25rem;text-align:center;box-shadow:3px 3px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:2rem">🔧</div>
+      <div style="font-family:'Fredoka One',cursive;color:#3f51b5;margin:0.5rem 0">Databricks CLI</div>
+      <div style="font-size:0.78rem;color:#555;line-height:1.6">Command-line control for workspaces, clusters, jobs, and DBFS. Essential for automation scripts and CI/CD pipelines.</div>
+    </div>
+    <div style="background:white;border:2.5px solid #7c3aed;border-radius:14px;padding:1.25rem;text-align:center;box-shadow:3px 3px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:2rem">🌍</div>
+      <div style="font-family:'Fredoka One',cursive;color:#7c3aed;margin:0.5rem 0">Terraform Provider</div>
+      <div style="font-size:0.78rem;color:#555;line-height:1.6">Manage workspaces, clusters, jobs, Unity Catalog resources as code. Version controlled. Reproducible. Drift-detected.</div>
+    </div>
+    <div style="background:white;border:2.5px solid #00897b;border-radius:14px;padding:1.25rem;text-align:center;box-shadow:3px 3px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:2rem">🔌</div>
+      <div style="font-family:'Fredoka One',cursive;color:#00897b;margin:0.5rem 0">REST APIs</div>
+      <div style="font-size:0.78rem;color:#555;line-height:1.6">Every action in the Databricks UI is backed by a REST API. Automate anything: cluster management, job submission, secret rotation.</div>
+    </div>
+    <div style="background:white;border:2.5px solid #ff8c00;border-radius:14px;padding:1.25rem;text-align:center;box-shadow:3px 3px 0 rgba(0,0,0,0.08)">
+      <div style="font-size:2rem">🔄</div>
+      <div style="font-family:'Fredoka One',cursive;color:#ff8c00;margin:0.5rem 0">CI/CD Pipelines</div>
+      <div style="font-size:0.78rem;color:#555;line-height:1.6">GitHub Actions or Azure DevOps runs Databricks tests on PR, promotes bundles from dev→staging→prod via Databricks Asset Bundles.</div>
+    </div>
+  </div>
+  <div class="did-you-know">
+    <p><strong>Databricks Asset Bundles (DABs)</strong> are the modern way to deploy Databricks code as infrastructure. Define your jobs, pipelines, and clusters in a YAML file, commit to Git, and let CI/CD promote the exact same configuration through every environment. No more "it works in dev but not prod" config drift!</p>
+  </div>
+</div>
+
+<!-- ========== CHAPTER 25 — ECOSYSTEM MAP ========== -->
+<div class="ecosystem" id="ch25">
+  <h2>🗺️ The Grand Lakehouse Map</h2>
+  <p style="text-align:center;color:#90caf9;margin-bottom:2.5rem;font-size:0.95rem">Everything Briko learned — all connected in one world</p>
+
+  <div class="eco-map">
+    <!-- Row 1: Sources -->
+    <div style="text-align:center;font-family:'Fredoka One',cursive;font-size:0.85rem;color:#90caf9;letter-spacing:2px;opacity:0.7">DATA SOURCES</div>
+    <div class="eco-row">
+      <div class="eco-node" style="border-color:#ff8c00;background:rgba(255,140,0,0.1)"><div class="eco-icon">🏭</div><h4 style="color:#ff8c00">ERP/CRM</h4><p>SAP, Salesforce</p></div>
+      <div class="eco-node" style="border-color:#ff8c00;background:rgba(255,140,0,0.1)"><div class="eco-icon">📡</div><h4 style="color:#ff8c00">Streaming</h4><p>Kafka, Kinesis</p></div>
+      <div class="eco-node" style="border-color:#ff8c00;background:rgba(255,140,0,0.1)"><div class="eco-icon">☁️</div><h4 style="color:#ff8c00">Cloud Files</h4><p>S3, ADLS, GCS</p></div>
+      <div class="eco-node" style="border-color:#ff8c00;background:rgba(255,140,0,0.1)"><div class="eco-icon">🌐</div><h4 style="color:#ff8c00">APIs</h4><p>REST, JDBC</p></div>
+    </div>
+
+    <div class="eco-arrow">⬇️</div>
+
+    <!-- Row 2: Ingestion -->
+    <div style="text-align:center;font-family:'Fredoka One',cursive;font-size:0.85rem;color:#90caf9;letter-spacing:2px;opacity:0.7">INGESTION LAYER</div>
+    <div class="eco-row">
+      <div class="eco-node" style="border-color:#00897b;background:rgba(0,137,123,0.15)"><div class="eco-icon">🔄</div><h4 style="color:#00ff88">Auto Loader</h4><p>Incremental file ingestion</p></div>
+      <div class="eco-node" style="border-color:#00897b;background:rgba(0,137,123,0.15)"><div class="eco-icon">🌊</div><h4 style="color:#00ff88">Structured Streaming</h4><p>Real-time events</p></div>
+      <div class="eco-node" style="border-color:#00897b;background:rgba(0,137,123,0.15)"><div class="eco-icon">📦</div><h4 style="color:#00ff88">Batch COPY</h4><p>Bulk historical loads</p></div>
+    </div>
+
+    <div class="eco-arrow">⬇️</div>
+
+    <!-- Row 3: Storage -->
+    <div style="text-align:center;font-family:'Fredoka One',cursive;font-size:0.85rem;color:#90caf9;letter-spacing:2px;opacity:0.7">STORAGE — MEDALLION ARCHITECTURE</div>
+    <div class="eco-row">
+      <div class="eco-node" style="border-color:#cd7f32;background:rgba(205,127,50,0.15)"><div class="eco-icon">🥉</div><h4 style="color:#ffa07a">Bronze</h4><p>Raw · Immutable</p></div>
+      <div style="display:flex;align-items:center;color:rgba(255,255,255,0.3)">→</div>
+      <div class="eco-node" style="border-color:#9e9e9e;background:rgba(158,158,158,0.15)"><div class="eco-icon">🥈</div><h4 style="color:#e0e0e0">Silver</h4><p>Cleansed · Joined</p></div>
+      <div style="display:flex;align-items:center;color:rgba(255,255,255,0.3)">→</div>
+      <div class="eco-node" style="border-color:#ffc107;background:rgba(255,193,7,0.15)"><div class="eco-icon">🥇</div><h4 style="color:#ffd600">Gold</h4><p>Aggregated · Analytics</p></div>
+    </div>
+
+    <div style="text-align:center;margin:0.5rem 0;font-size:0.8rem;color:rgba(255,255,255,0.4)">↕️ All powered by Delta Lake (ACID · Time Travel · Schema Evolution)</div>
+
+    <!-- Row 4: Compute -->
+    <div style="text-align:center;font-family:'Fredoka One',cursive;font-size:0.85rem;color:#90caf9;letter-spacing:2px;opacity:0.7">COMPUTE ENGINES</div>
+    <div class="eco-row">
+      <div class="eco-node" style="border-color:#ff8c00;background:rgba(255,140,0,0.15)"><div class="eco-icon">⚡</div><h4 style="color:#ff8c00">Apache Spark</h4><p>Distributed processing</p></div>
+      <div class="eco-node" style="border-color:#ffd600;background:rgba(255,214,0,0.15)"><div class="eco-icon">🚀</div><h4 style="color:#ffd600">Photon</h4><p>C++ SQL acceleration</p></div>
+      <div class="eco-node" style="border-color:#00897b;background:rgba(0,137,123,0.15)"><div class="eco-icon">🔧</div><h4 style="color:#00ff88">Delta Live Tables</h4><p>Declarative pipelines</p></div>
+    </div>
+
+    <div class="eco-arrow">⬇️</div>
+
+    <!-- Row 5: Workloads -->
+    <div style="text-align:center;font-family:'Fredoka One',cursive;font-size:0.85rem;color:#90caf9;letter-spacing:2px;opacity:0.7">WORKLOADS</div>
+    <div class="eco-row">
+      <div class="eco-node" style="border-color:#1565c0;background:rgba(21,101,192,0.2)"><div class="eco-icon">📊</div><h4 style="color:#90caf9">Databricks SQL</h4><p>BI · Dashboards · Photon</p></div>
+      <div class="eco-node" style="border-color:#e91e8c;background:rgba(233,30,140,0.2)"><div class="eco-icon">🧠</div><h4 style="color:#f48fb1">ML Platform</h4><p>MLflow · Feature Store</p></div>
+      <div class="eco-node" style="border-color:#ff5252;background:rgba(255,82,82,0.2)"><div class="eco-icon">🔧</div><h4 style="color:#ff8a80">Data Engineering</h4><p>Jobs · Workflows · DLT</p></div>
+    </div>
+
+    <div class="eco-arrow">⬇️</div>
+
+    <!-- Row 6: Governance -->
+    <div style="text-align:center;font-family:'Fredoka One',cursive;font-size:0.85rem;color:#90caf9;letter-spacing:2px;opacity:0.7">GOVERNANCE LAYER (EVERYWHERE)</div>
+    <div class="eco-row" style="justify-content:center">
+      <div class="eco-node" style="border-color:#7c3aed;background:rgba(124,58,237,0.2);max-width:300px;flex:none;width:300px"><div class="eco-icon">🛡️</div><h4 style="color:#d8b4fe">Unity Catalog</h4><p>RBAC · Lineage · Audit · Masking · Row-Level Security · Data Discovery</p></div>
+    </div>
+
+    <div class="eco-arrow">⬇️</div>
+
+    <!-- Row 7: Sharing + DevOps -->
+    <div class="eco-row">
+      <div class="eco-node" style="border-color:#009688;background:rgba(0,150,136,0.2)"><div class="eco-icon">🤝</div><h4 style="color:#80cbc4">Delta Sharing</h4><p>Open protocol · Cross-cloud</p></div>
+      <div class="eco-node" style="border-color:#3f51b5;background:rgba(63,81,181,0.2)"><div class="eco-icon">🔩</div><h4 style="color:#9fa8da">DevOps</h4><p>Terraform · CI/CD · CLI</p></div>
+      <div class="eco-node" style="border-color:#ff8c00;background:rgba(255,140,0,0.2)"><div class="eco-icon">☁️</div><h4 style="color:#ffa07a">Multi-Cloud</h4><p>AWS · Azure · GCP</p></div>
+    </div>
+  </div>
+
+  <!-- Final Briko goodbye -->
+  <div style="text-align:center;margin-top:4rem;padding:2rem">
+    <svg viewBox="0 0 200 200" width="140" height="140" style="display:block;margin:0 auto">
+      <ellipse cx="100" cy="140" rx="50" ry="55" fill="#ff5252"/>
+      <circle cx="100" cy="75" r="48" fill="#ffc67a"/>
+      <ellipse cx="100" cy="30" rx="42" ry="16" fill="#5d4037"/>
+      <circle cx="82" cy="72" r="8" fill="white"/><circle cx="118" cy="72" r="8" fill="white"/>
+      <circle cx="84" cy="74" r="5" fill="#333"/><circle cx="120" cy="74" r="5" fill="#333"/>
+      <circle cx="86" cy="72" r="2" fill="white"/><circle cx="122" cy="72" r="2" fill="white"/>
+      <path d="M80,92 Q100,112 120,92" stroke="#a0522d" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="68" cy="86" r="9" fill="#ff8a65" opacity="0.5"/>
+      <circle cx="132" cy="86" r="9" fill="#ff8a65" opacity="0.5"/>
+      <ellipse cx="40" cy="138" rx="15" ry="26" fill="#ff5252" transform="rotate(-15,40,138)"/>
+      <ellipse cx="160" cy="138" rx="15" ry="26" fill="#ff5252" transform="rotate(15,160,138)"/>
+      <circle cx="28" cy="162" r="13" fill="#ffc67a"/>
+      <circle cx="172" cy="158" r="13" fill="#ffc67a"/>
+      <!-- Thumbs up -->
+      <text x="22" y="168" font-size="16">👍</text>
+      <rect x="80" y="190" width="18" height="22" rx="8" fill="#5d4037"/>
+      <rect x="102" y="190" width="18" height="22" rx="8" fill="#5d4037"/>
+      <!-- Star + diploma -->
+      <text x="148" y="55" font-size="22">🎓</text>
+    </svg>
+    <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--photon-yellow);margin:1rem 0">You made it!</div>
+    <div style="font-family:'Caveat',cursive;font-size:1.4rem;color:#90caf9;max-width:600px;margin:0 auto;line-height:1.6">"I came to Lakehouse World knowing nothing. Now I know that data doesn't have to be painful — it just needs the right architecture, the right characters, and a little bit of Briko courage. 🏠"</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:1rem;color:rgba(255,255,255,0.4);margin-top:1rem">— Briko the Builder, Databricks Explorer</div>
+  </div>
+</div>
+
+<div class="footer">
+  🧱 Briko's Big Data Adventure · An Illustrated Guide to Databricks<br>
+  <span style="font-family:'Caveat',cursive;font-size:1rem;opacity:0.6">Inspired by the Phippy Illustrated Guide to Kubernetes · Made with ❤️ for data people</span>
+</div>
+
+<script>
+function scrollToChapter(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
